@@ -67,7 +67,7 @@ sbt package
 
 ```sbt
 libraryDependencies += "org.foobar" %% "foobar" % "1.8"
-libraryDependencies += "org.scalatest" %% "scalatest" % "latest.milestone" % 
+libraryDependencies += "org.scalatest" %% "scalatest" % "latest.milestone" %
 "test"
 libraryDependencies += "org.foobar" %% "foobar" % "latest.integration"
 logLevel := Level.Debug
