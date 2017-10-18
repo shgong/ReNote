@@ -631,6 +631,3 @@ return top K score(d)
 
 - search term position proximity should affect score
 - hand coding and machine learning
-
-
-#### 7.2.3 Designing parsing and scoring functions
