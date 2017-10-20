@@ -1,0 +1,26 @@
+```scala
+import scala.collection.mutable.ListBuffer
+val percent = new ListBuffer[String]()
+val all = path1_all zip path2_all
+for ((path1, path2) <- all) {
+    val d1 = spark.read.option("sep","|").csv(path1).toDF("GUID","Account_Number","CUSTOMER_ACCOUNT_ID","CORP_SYSPRIN","HOUSE_KEY","SNAPSHOT_DATE","YEAR","Month","Model_Output_Id","MODEL_PREFIX","MODEL_SCORE","MODEL_DECILE","MODEL_DECILE_REG","MODEL_DECILE_DIV","MODEL_SEGMENT","MODEL_CLASSIFICATION","MODEL_INSERTION_DATE","EPS_ACCT_ID","EPS_BUSN_ID","EPS_ADDR_ID")
+    val d2 = spark.read.option("sep","|").csv(path2).toDF("GUID_","Account_Number","CUSTOMER_ACCOUNT_ID_","CORP_SYSPRIN_","HOUSE_KEY","SNAPSHOT_DATE_","YEAR_","Month_","Model_Output_Id_","MODEL_PREFIX_","MODEL_SCORE_","MODEL_DECILE_","MODEL_DECILE_REG_","MODEL_DECILE_DIV_","MODEL_SEGMENT_","MODEL_CLASSIFICATION_","MODEL_INSERTION_DATE_","EPS_ACCT_ID","EPS_BUSN_ID","EPS_ADDR_ID")
+
+    val fullColumns = d1.dtypes.map(_._1)
+    val keyColumns = Seq("Account_Number","HOUSE_KEY","EPS_ACCT_ID","EPS_BUSN_ID","EPS_ADDR_ID")
+    val nonKeyColumns = fullColumns.filter(!keyColumns.contains(_))
+
+    val e1 = d1.na.fill("", keyColumns)
+    val e2 = d2.na.fill("", keyColumns)
+
+    val joined = e1.join(e2, keyColumns)
+    joined.cache()
+    e1.count
+    e2.count
+    val total = joined.count()
+
+    val pct = nonKeyColumns.foreach(c=> println("| %-20s %.3f%%".format(c,joined.filter(s"${c}=${c}_ OR (${c} IS NULL AND ${c}_ IS NULL)").count * 100.0 / total)))
+
+    percent+= pct
+}
+```
