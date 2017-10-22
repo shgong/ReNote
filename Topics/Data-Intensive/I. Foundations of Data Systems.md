@@ -123,6 +123,7 @@ Use twitter for example, when someone post a tweet
   - need for greater scalability
   - free and open source over commercial databases
   - frustration with restrictions of relational schema
+
 - Object-Relational Mismatch
   - common criticism for SQL: an awkward translation layer is required
     - ORM frameworks like ActiveRecord and Hibernate
@@ -158,12 +159,14 @@ Use twitter for example, when someone post a tweet
         }
       ```
     - though there are also problems with JSON as a data encoding format
+
 - Many-to-One and Many-to-Many
   - why region_id and industry_id use id?
     - drop down input to avoid ambiguity and spelling error
     - better localization support and search
   - such normalization is many-to-one, don't fit nicely into document model
   - reference are handled specially, e.g. organizations, schools and other users
+
 - Document Model
   - lead to simpler application code
   - limitation
@@ -181,9 +184,106 @@ Use twitter for example, when someone post a tweet
       - Oracle allows multi-table index cluster table
       - with column family concept in Bigtable data model (Cassandra/HBase)
 
+- Converge of document and relational DB
+  - many RDB support XML around mid-2000s
+  - PostgreSQL 9.3, MySQL 5.7, IBM DB2 10.5 support JSON web API
+  - RethinkDB support relational-like joins
+  - some MongoDB Drivers automatically resolve database references
+
 ### 2.2 Query Languages
 
+#### SQL
+Imperative
+```js
+function getSharks() {
+  var sharks = []
+  for (var i=0; i<animals.length; i++){
+    if(animals[i].family == "Sharks") sharks.push(animals[i])
+  }
+  return sharks
+}
+```
+
+Declarative
+```sql
+/* sharks = animal.filter(family="Sharks") */
+SELECT * FROM animals WHERE family = "Sharks"
+```
+
+#### Declarative Queries on the web
+
+Declarative
+```css
+li.selected > p {
+  background-color: blue;
+}
+```
+
+Imperative
+```js
+var liElements = document.getElementsByTagName("li");
+for (var i = 0; i < liElements.length; i++) {
+  if (liElements[i].className === "selected") {
+    var children = liElements[i].childNodes;
+    for (var j = 0; j < children.length; j++) {
+      var child = children[j];
+      if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "P") {
+        child.setAttribute("style", "background-color: blue");
+      }
+    }
+  }
+}
+```
+
+#### MapReduce Query
+
+- something in between
+  - logic of query is expressed with snippets of code
+
+```sql
+SELECT date_trunc('month', observation_timestamp) AS observation_month, sum(num_animals) AS total_animals
+FROM observations
+WHERE family = 'Sharks' GROUP BY observation_month;
+```
+
+MongoDB MapReduce feature
+```js
+db.observations.mapReduce(
+  function map() {
+    var year = this.observationTimestamp.getFullYear();
+    var month = this.observationTimestamp.getMonth() + 1;
+    emit(year + "-" + month, this.numAnimals);
+  },
+  function reduce(key, values) {
+    return Array.sum(values);
+  },
+  {
+    query: { family: "Sharks" }, // starting filter, declarative
+    out: "monthlySharkReport"    // which collection to write final output
+  }
+);
+```
+
+MongoDB 2.2 aggregation pipeline
+more like SQL now with different style
+```js
+db.observations.aggregate([
+        { $match: { family: "Sharks" } },
+        { $group: {
+            _id: {
+                year:  { $year:  "$observationTimestamp" },
+                month: { $month: "$observationTimestamp" }
+            },
+            totalAnimals: { $sum: "$numAnimals" }
+        }}
+]);
+```
+
+
 ### 2.3 Graph-Like Model
+
+
+
 
 
 ## 3. Storage and Retrieval
