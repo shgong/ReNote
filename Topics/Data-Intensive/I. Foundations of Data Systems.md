@@ -545,9 +545,20 @@ db_get () {
 - Doesn't really matter column orders
   - however, sort rows is tricky if stored in column
   - usually sorted by most frequent query
+  - that column is also hugely compressed
+- Vertica C-Store
+  - Different query benefit from different sort-order
+  - store same data sorted in different ways
+
 
 ## 4. Encoding and Evolution
 
+- data model upgrade compatibility
+  - backward compatible
+  - forward compatible
+
 ### 4.1 Formats for Encoding Data
+
+
 
 ### 4.2 Modes of Dataflow
