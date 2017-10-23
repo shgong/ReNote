@@ -492,8 +492,59 @@ db_get () {
 
 ### 3.2 Transaction processing or analytics
 
+- Transaction
+  - Transaction don't necessarily need ACID
+  - Just allow clients to make low-latency read/write
+
+- OLTP: Online Transaction Processing
+  - read: small records by key
+  - write: random-access, low-latency
+  - usage: customer, web-app
+  - data: latest state, GB
+- OLAP: Online analytics Processing
+  - read: aggregate large number of records
+  - write: ETL, bulk import
+  - usage: analytics
+  - data: history, TB-PB
+
+- Data Warehousing
+  - Different sources
+    - Sales DB from E-Commerce site (customer)
+    - Inventory DB from Stock app (warehouse worker)
+    - Geo DB from vehicle route planner (driver)
+  - ETL into warehouse
+    - Extract
+    - Transform
+    - Load
+  - Vendors
+    - Teradata
+    - Vertica
+    - SAP HANA
+    - ParAccel: Amazon Redshift
+    - Hadoop: Hive, Spark, Impala, Presto (Google Dremel)
+
 ### 3.3 Column-Oriented Storage
 
+- A typical data warehouse query only access 4-5 of 1000 columns
+- Column-Oriented storage will be efficient
+  - e.g. Parquet, based on Google Dremel
+
+- Column Compression
+  - e.g. 69, 69, 69, 69, 74, 31, 31, 31, 69
+  - bitmap for possible values
+    - 31: 0 0 0 0 0 1 1 1 0
+    - 69: 1 1 1 1 0 0 0 0 1
+    - 74: 0 0 0 0 1 0 0 0 0
+  - zero-one encoding
+    - 31: 5,3,1
+    - 69: 0,4,4,1
+    - 74: 4,1
+  - query: when value in (31,74)
+    - use bitmap can fetch column super fast with bitset merge
+
+- Doesn't really matter column orders
+  - however, sort rows is tricky if stored in column
+  - usually sorted by most frequent query
 
 ## 4. Encoding and Evolution
 
