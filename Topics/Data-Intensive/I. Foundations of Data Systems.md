@@ -282,13 +282,213 @@ db.observations.aggregate([
 
 ### 2.3 Graph-Like Model
 
+- structures
+  - document model: one-to-many or no relationship
+  - relational model: simple many-to-many
+  - graph model: complex many-to-many
+- graph algorithm
+  - car navigation
+  - page rank
 
+#### property graph using relational schema
+```sql
+CREATE TABLE vertices (
+  vertex_id  integer PRIMARY KEY,
+  properties json
+);
 
+CREATE TABLE edges (
+  edge_id     integer PRIMARY KEY,
+  tail_vertex integer REFERENCES vertices (vertex_id),
+  head_vertex integer REFERENCES vertices (vertex_id),
+  label       text,
+  properties  json
+);
 
+CREATE INDEX edges_tails ON edges (tail_vertex);
+CREATE INDEX edges_heads ON edges (head_vertex);
+```
+
+#### Cypher Query Language
+
+- declarative query language by Neo4j
+
+```cypher
+CREATE
+  (NAmerica:Location {name:'North America', type:'continent'}),
+  (USA:Location      {name:'United States', type:'country'  }),
+  (Idaho:Location    {name:'Idaho',         type:'state'    }),
+  (Lucy:Person       {name:'Lucy' }),
+  (Idaho) -[:WITHIN]->  (USA)  -[:WITHIN]-> (NAmerica),
+  (Lucy)  -[:BORN_IN]-> (Idaho)
+
+MATCH
+  (person) -[:BORN_IN]->  () -[:WITHIN*0..]-> (us:Location {name:'United States'}),
+  (person) -[:LIVES_IN]-> () -[:WITHIN*0..]-> (eu:Location {name:'Europe'})
+RETURN person.name
+```
+
+#### SPARQL query language
+
+- for triple store using RDF data model
+```sparql
+PREFIX : <urn:example:>
+SELECT ?personName WHERE {
+  ?person :name ?personName.
+  ?person :bornIn  / :within* / :name "United States".
+  ?person :livesIn / :within* / :name "Europe".
+}
+
+(person) -[:BORN_IN]-> () -[:WITHIN*0..]-> (location)   # Cypher
+?person :bornIn / :within* ?location.                   # SPARQL
+(usa {name:'United States'})   # Cypher
+?usa :name "United States".    # SPARQL
+```
 
 ## 3. Storage and Retrieval
 
 ### 3.1 Data Structures
+
+#### World's simplest database
+
+```sh
+#!/bin/bash
+db_set () {
+  echo "$1,$2" >> database
+}
+db_get () {
+  grep "^$1," database | sed -e "s/^$1,//" | tail -n 1
+}
+```
+
+- bash key-value store with comma separated text file
+  - efficient db_set
+  - terrible db_get: need index
+- trade off
+  - well-chosen index speed up read
+  - every index slow down write
+- most db let user choose index, using knowledge of typical query patterns
+
+
+#### Hash Indexes
+
+- key-value or dictionary data type, usually implemented as hash map
+  - Used by Bitcask
+- simplistic hashmap: in-memory hashmap to byte offset
+  - require: all keys fit in RAM
+
+- Data file Segment
+  - break log into segments, close when it read a certain limit
+  - compaction
+    - throw away duplicate, keep most recent
+    - can run several compaction together
+  - every query
+    - search most recent segment's index
+
+- Real implementation
+  - format: not CSV, binary with length encoder and raw string is more efficient (no escaping)
+  - deletion: append a deletion record (called tombstone)
+  - crash: read file to rebuild hashmap, or storing snapshot
+  - partially written records: checksum to detect corruption
+  - concurrency: only one writer
+
+- Pro
+  - append-only is fastest at write
+  - immutable support concurrency and crash recovery
+  - compaction to merge segments  
+- Con
+  - Hash table must fit in memory
+  - No Scans / Range queries
+
+
+#### SSTables and LSM-Trees
+
+- What if Sort-by-key
+  - seems break our ability to use sequential writes？
+  - only within blocks
+
+- SSTable, or Sorted String Table
+  - merge is simple and efficient
+    - read files side by side, merge sort
+  - don't need detailed index
+    - only some index, then scan/binary-search is enough
+    - can group records into block, compress before writing to disk
+- How to get data sorted
+  - maintain a sorted structure
+    - on disk: B Tree
+    - in memory: AVL Tree or Red Black Tree
+- example
+  - Write: add to in-memory balanced tree, memtable
+  - Exceeds size limit: write to disk as SSTable file
+  - Read: memtable, then most recent segment file
+  - From time to time, run merge / compaction in the background
+  - Recovery: keep recent write log, remove when become SSTable
+
+
+- Usage
+  - SSTable and Memtable, Introduced in Google's Bigtable paper
+  - Used in LevelDB, rocksDB, Cassandra and HBase
+  - original algorithm by Patrick O'Neil, LSM-tree, log-structured merge-tree
+  - used by Lucene (Elastic Search and Solr) to store term dictionary
+
+
+- Performance Optimization
+  - slow when look up key does not exist
+    - use bloom filter
+      - a memory-efficient data structure to approximating contents of a set
+  - different compaction
+    - levelDB and RocksDB use leveled compaction
+      - key range split up into smaller SSTables
+      - old data moved into separate levels
+    - HBase use size-tiered compaction
+      - new and smaller SSTables are successively merged into older and larger one
+    - Cassandra support both
+
+#### B Trees
+
+- most wildly used indexing structure
+  - SSTable keep large block and write sequentially
+  - B Tree keep 4KB block/page and read/write one page at a time
+    - each page has address, like pointer in disk (instead of memeory)
+    - look up key from root, each child for a certain range of keys
+    - growing by spliting a page
+    - with branching factor
+
+- basic operation
+  - overwrite a page on disk with new data
+  - need move hard disk head
+  - split operation require rewriting multiple pages
+    - dangerous, what if crash in the process
+- WAL, write-ahead log
+  - append-only log before any B-Tree modification
+
+- Optimization
+  - LMDB use copy-on-write scheme instead of WAL log
+    - Snapshot isolation, better for concurrency control
+  - abbreviate keys to save space
+  - try lay out the tree in sequential order on disk as possible
+  - add jumping pointer to trees (like sibling)
+
+
+#### B-Tree vs LSM-Tree
+
+- B-Tree
+  - read fast
+  - each key exist exact one place, good for transactions
+  - write data twice: WAL & tree page
+  - leave disk space unused due to fragmentation
+- LSM-Tree
+  - write fast
+  - compressed better
+  - compaction process can be expensive
+
+
+- R-Tree
+  - above trees have a single key
+    - cannot query multiple columns of a table simultaneously
+  - you can translate into single number, then use regular B-Tree
+  - more commonly, specialized spatial index R-Tree is used
+  - example: latitude & longtitude, postGIS
 
 ### 3.2 Transaction processing or analytics
 
