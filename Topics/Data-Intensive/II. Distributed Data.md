@@ -150,14 +150,116 @@
 
 #### Multi-Leader Replication topology
 
+- relationship between Leaders
+  - all-to-all
+    - write may arrive in wrong order
+  - circular: forward into a circle, MySQL default
+    - may fail on one node
+  - star: one root node
+    - may fail on root node
+
 ### 5.4 Leaderless Replication
 
+- Amazon Dynamo DB
+  - Riak, Casssandra, Voldemort
 
+- failover does not exist
+  - write
+    - client send write to all three replica
+    - if receive two ok, ignore the fact that one replica missed
+  - read
+    - sent to several nodes in parallel
+    - use the version number determine which is newer
+
+- how to catch up
+  - read repair
+    - when read, find stale value from wrong replica
+    - works well when frequent read
+  - anti-entropy process
+    - background process that looks for differentce
+
+- Quorum
+  - n replica
+  - every write must be confirmed by w node
+  - every read must query r nodes
+  - w+r > n
+- DynamoDB
+  - n is odd number
+  - w = r = (n+1)/2
+- Limitation of Quorum Consistency
+  - likely to be edge case where stale value returned
+  - can tolerate eventual consistence
+
+- Sloppy Quorum and Hinted Handoff
+  - what if network is interrupted
+    - return errors to all requests that can not reach w/r home nodes?
+    - accept errors anyway, write to reachable nodes (neighbors)
+  - latter is sloppy quorum
+  - when networking resolves, hand off to home nodes
+
+#### Detect concurrent writes
+
+- What if several clients write to same key
+  - A,B write to key X in 3 node data store
+    - node 1 receive A
+    - node 2 receive A then B
+    - node 3 receive B then A
+- approaches
+  - last write wins
+    - force an arbitrary order
+    - attach timestamp to each write
+    - safe way to use: ensure key is written once
+  - happens-before relationship
+    - server maintain version number for every key
+      - or version vector, for multiple replica
+    - when read, return all values that haven't been overwritten
+    - when write, must include version number from previous read
+      - client had to merge values
+    - server can overwrite all below that version number
 
 
 ## 6. Partitioning
+
+- Partitioned DB
+  - Teradata 1980s
+  - NoSQL
+  - Hadoop-based warehouse
+
 ### 6.1 Parition and Replication
+
+- a typical node
+  - partition 1 lead
+  - partition 2 follower
+  - partition 3 follower
+
 ### 6.2 Key-value Data
+
+- which record on which node?
+  - skewed: some partition has more data, less effective
+
+- Parition by key range
+  - PRO
+    - manually or auto choose partition boundry
+    - keep keys sorted within each partition, help range scan
+  - CON
+    - easily skewed, or worse, hotspot
+    - if key is timestamp, all records go to same partition
+
+- Partition by key hash
+  - PRO: good hash function unify skewed data
+    - Cassandra and MongoDB use MD5
+    - Voldemort use Fowler-Noll-Vo function
+  - CON
+    - range query send to all nodes in MongoDB
+    - Riak, Couchbase, Voldemort don't support range query
+
+- Cassandra
+  - can have compound primary key
+    - first part hashed to determine partition
+    - rest part as index for sorting inside SSTables
+  - support range query on rest part
+  - enables an elegant one-to-many relationship
+
 ### 6.3 Secondary Indexes
 ### 6.4 Rebalancing
 ### 6.5 Request Routing
