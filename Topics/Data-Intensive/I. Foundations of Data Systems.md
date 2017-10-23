@@ -564,7 +564,7 @@ db_get () {
   - in disk, as self-contained sequence of bytes, like JSON, XML, CSV
 - translation called encoding, serialization, or mashalling
 
-- Language-Specific Formats
+#### Language-Specific Formats
   - e.g.
     - Java: java.io.Serializable, Kryo
     - Ruby: Marshal
@@ -573,7 +573,7 @@ db_get () {
   - tied to a particular language, particular version of package
   - decoding process need to instantiate arbitrary classes, security problem
 
-- JSON, XML, Binary Variants
+#### JSON, XML, Binary Variants
   - e.g.
     - XML: verbose and unnecessarily complicated, support unicode
     - CSV: popular, less powerful, don't have schema
@@ -582,9 +582,12 @@ db_get () {
     - JSON: MessagePack, BSON, BJSON, BISON, BJSON, Smile
     - XML: WBXML, Fast Infoset
 
-- Thrift and Protocol Buffers
+#### Thrift and Protocol Buffers
   - require schema
-
+  - has two different binary encoding formats
+    - Binary Protocol
+    - Compact Protocol
+  - There are no field name, only field tag to fetch the name from schema
 
 ```
 # Thrift (FB)
@@ -601,4 +604,164 @@ message Person {
   repeated string interests = 3;
 }
 ```
+
+Thrift Binary Protocol
+```
+0b              type 11(string)
+  0001          field tag = 1
+    00000006    length = 6
+      4d617274696a Martin
+0a              type 10 (int64)
+  0002          field tag = 2
+    0000000000000539  1337
+0f              type 15 list
+  0003          field tag =3
+    0b          type 11 string
+    00000002    2 list items
+      0000000b  length 11
+        646179647265616d696e67 daydreaming
+      00000007  length 7
+        6861636b696e67  hacking
+    00          end of struct
+```
+
+Thrift Compact Protocol
+```
+18    0001 1000    field tag = 1, type 8 string
+  06               length
+    4d617274696a   Martin
+16    0001 0110    field tag += 1, type 6 int64
+  f2 14
+19    0001 1001    field tag += 1, type 9 list
+  28  0010 1000   2 list item, type 8 string
+    0b 646179647265616d696e67 daydreaming
+    07 6861636b696e67         hacking
+  00
+```
+
+- Schema Evolution
+  - don't change field-tag
+  - can add optional new field-tags
+  - change type may truncate values
+
+
+#### Avro
+
+- another binary coding that is interestingly different
+- two schema language
+  - Avro IDL for human
+  - Json for machine
+
+```
+record Person {
+  string userName;
+  union { null, long } favoriteNumber = null;
+  array<string> interests;
+}
+
+{
+  "type": "record",
+  "name": "Person",
+  "fields": [
+    {"name": "userName", "type": "string"},
+    {"name": "favoriteNumber", "type": ["null", "long"], "default": null},
+    {"name": "interests", "type": {"type": "array", "items": "string"}}
+  ]
+}
+```
+
+- no tag numbers in the schema
+- nothing to identify fields or datatypes in byte sequence
+- also use variable-lnegth encoding like CompactProtocol
+
+Avro
+```
+0c  0000110 0         length 6 | sign 0
+  4d617274696e        Martin
+02  0000001 0         union branch 1 | sign 0
+  f214                1337
+04  0000010 0         item 2 | sign 0
+  16 646179647265616d696e67
+  0e 6861636b696e67
+  00
+```
+
+- Evolve
+  - reader and writer's schema don't have to be the same, just compatible
+  - Avro lib will look side by side and translate
+    - will resolve field reposition (if with same name)
+      - change name => can give alias
+    - will fill missing col with default value
+    - will try to resolve type changes
+  - only add or remove a field with default value
+  - null field need to be use union type `union {null, long, string} field_name`
+    - thus don't have optional, required signature (like Thrift, ProtocolBuf)
+- Dynamically generated schema
+  - Avro can generate a JSON directly from RDBMS
+  - no tag-numbers means better compatibility when RDBMS schema changes
+  - tag-number of ProtocolBuf and Thrift had to be set by hand to ensure match
+
+
 ### 4.2 Modes of Dataflow
+
+#### Through Databases
+
+- store in database like send message to your future self
+- common for different process accessing a DB at the same time
+- DB is not like server-side application, 5 year old data & encoding may still be there
+  - migrating into new schema, expensive
+  - LinkedIn Espresso DB use Avro for Storage
+
+#### Through Services: REST and RPC
+
+- Web Service
+  - HTTP used as protocol for communication
+  - REST is not a protocol, but a design philosophy using HTTP
+  - SOAP is XML-based protocol
+    - most commonly over HTTP still, but avoid HTTP features
+    - API using XML-based language called WSDL
+
+- RPC
+  - make a request to remote network look the same as calling a function
+  - seems convenient at first, but fundementally flawed
+  - network request is fundementally different
+- Problems with RPC (Remote procedure calls)
+  - JavaBeans and RMI(Remote Method Invocation) limit to Java
+  - DCOM (Distributed Component Object Model) limit to Microsoft
+- Directions for RPC
+  - platforms
+    - Thrift: Finagle
+    - Protocol Buffers: gRPC
+    - Json Over HTTP: Rest.li
+  - explicit about difference
+    - Finagle and Rest.li use Future/Promise to encapsulate asyc actions that may fail
+    - gRPC support streams, a series of call
+
+#### Async Message-Passing Dataflow
+
+- Message Queue
+  - like RPC, that a client's message is delivered with low latency
+  - like DB, that message is not sent via direct connection, but via message broker/middleware
+- advantages
+  - can act as buffer is recipient unavailable or overloaded
+  - can redeliver message automatically
+  - avoid sneder know IP/Port of recipient (good for cloud platform)
+  - allow one message to multiple recipient
+
+- Message Brokers
+  - Example
+    - TIBCO, IBM WebSphere
+    - RabbitMQ, ActiveMQ, HornetQ, NATS, Apache Kafka
+  - Core
+    - one process send message to named queue/topic
+    - broker ensure message deliver to one or more consumer/subscriber
+    - don't enforce any data model, message just byte sequence
+
+- Actor framework
+  - Actor model is a programming model for single process
+  - Don't deal with threads, encapsulate logic in actors, with local state & communications
+  - basically integrates a message broker and actor programming model
+  - example
+    - Akka, default with Java Serialization, can replace with ProtocolBuf for evolution
+    - Orleans, need set up new cluster to upgrade
+    - Erlang OTP, hard to change schema, experiment map datatype (like JSON) may solve this
