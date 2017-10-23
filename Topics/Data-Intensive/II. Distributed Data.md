@@ -98,6 +98,58 @@
     - write causally related writes to same partition
 
 ### 5.3 Multi-Leader Replication
+
+- multiple data centers
+  - within each leader-follower structure
+  - PRO
+    - avoid every write go across data center, reduce latency
+    - tolerance of outage and network issue
+  - Big downside
+    - resolve conflict across data center
+
+- Clients with offline replication
+  - Calendar app with local database, lilke multiple data center
+  - rich history of broken calendar sync
+
+- Collaborative editting
+  - not a db replicate problem, but similar
+  - either lock doc, or handle conflicts
+
+#### Handle write conflicts
+
+- Sync vs async
+  - single-leader can block second writer, or let user retry
+  - you may make conflict detection sync, but lose main advantage of multi-leader
+
+- Conflict Avoidance
+  - makes sure all writes for some record go to same leader
+  - route to the same data center (unless data center crash)
+
+- Converge towards consistent state
+  - determine which is the final write
+  - approaches
+    - give write unique ID, like timestamp, pick highest
+    - give replica a unique ID, always replicate from higher replica
+    - record conflict and prompt the user
+
+- Custom conflict resolution logic
+  - on write
+    - DB calls conflict handler
+    - Bucardo allow you write snippets of Perl to resolve
+  - on read
+    - multiple versions of data returned
+    - CouchDB works this way
+  - resolving algorithm
+    - Conflict-free replicated datatype CRDT
+      - concurrently edible data types, used by Riak 2.0
+    - Mergeable persistent data structure
+      - track history explicitly, used in Git
+    - Operational transformation
+      - edit ordered list of items like text document
+      - used by Google Doc and etherpad
+
+#### Multi-Leader Replication topology
+
 ### 5.4 Leaderless Replication
 
 
