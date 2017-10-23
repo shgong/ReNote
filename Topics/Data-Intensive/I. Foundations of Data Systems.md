@@ -395,7 +395,7 @@ db_get () {
 - Pro
   - append-only is fastest at write
   - immutable support concurrency and crash recovery
-  - compaction to merge segments  
+  - compaction to merge segments
 - Con
   - Hash table must fit in memory
   - No Scans / Range queries
@@ -559,6 +559,46 @@ db_get () {
 
 ### 4.1 Formats for Encoding Data
 
+- two representation
+  - in memory, as objects, structs, lists, arrays, hash tables, trees, optimized for cpu
+  - in disk, as self-contained sequence of bytes, like JSON, XML, CSV
+- translation called encoding, serialization, or mashalling
+
+- Language-Specific Formats
+  - e.g.
+    - Java: java.io.Serializable, Kryo
+    - Ruby: Marshal
+    - Python: Pickle
+  - allow in-memoery object to be saved and restored with minimum code
+  - tied to a particular language, particular version of package
+  - decoding process need to instantiate arbitrary classes, security problem
+
+- JSON, XML, Binary Variants
+  - e.g.
+    - XML: verbose and unnecessarily complicated, support unicode
+    - CSV: popular, less powerful, don't have schema
+    - JSON: popular, web, can distinguish number and string
+  - Binary encodings
+    - JSON: MessagePack, BSON, BJSON, BISON, BJSON, Smile
+    - XML: WBXML, Fast Infoset
+
+- Thrift and Protocol Buffers
+  - require schema
 
 
+```
+# Thrift (FB)
+struct Person {
+  1: required string userName,
+  2: optional i64 favoriteNumber,
+  3: optional list<string> interests
+}
+
+# Protocol Buffer (Google)
+message Person {
+  required string user_name = 1;
+  optional int64 favorite_number = 2;
+  repeated string interests = 3;
+}
+```
 ### 4.2 Modes of Dataflow
