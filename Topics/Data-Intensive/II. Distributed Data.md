@@ -260,6 +260,11 @@
   - support range query on rest part
   - enables an elegant one-to-many relationship
 
+- Other Skewed Occasion
+  - celebrity on social network
+  - if a key is hot, add random number to end of key
+    - but have to read from lots of nodes
+
 ### 6.3 Secondary Indexes
 ### 6.4 Rebalancing
 ### 6.5 Request Routing
