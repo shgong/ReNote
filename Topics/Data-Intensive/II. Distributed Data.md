@@ -363,7 +363,66 @@
   - CAP theorem: Linearizability
   - ACID: good state
 
+#### Single-Object & Multi-Object
+
+- multi-object transactions are needed to keep sync
+  - atomicity + isolation: message and counter should be in sync
+  - how to determine which read/write belong to same transaction
+    - client: based on TCP connection
+      - BEGIN TRANSACTION and COMMIT
+- single object write
+  - write 20kb json to a db, what if power/network fails, or other client reads?
+  - Atomicity: use log for crash recovery
+  - Isolation: use a lock on each object
+- multi-object transaction
+  - difficult to implement across partitions
+  - but useful in scenarios
+    - rdb, foreign key reference
+    - document db that lack join, encourage denormalization sync
+    - secondary index update
+
 ### 7.2 Weak Isolation Levels
+
+- Concurrency bugs
+  - triggered only bad luck with timing
+  - might occur very rare
+  - difficult to reason about, large application with partitions
+- DB try to hide concurrency issue from developers, by transaction isolation
+  - many popular RDB use weak isolation, can cause issue
+
+#### Read Commited
+- rule
+  - no dirty reads: can not see uncommited data
+  - no dirty writes: can not overwrite uncommited data
+- used
+  - Oracle 11g, PostgreSQL, SQL Server 2012, MemSQL etc
+- achieve
+  - aborts
+  - prevent reading incomplete results
+  - prevent concurrent writes
+- implementation
+  - row-level locks: transaction acquire lock on row object
+  - also copy old commited value, so don't need read lock (extra await
+
+#### Snapshot Isolation
+- Serializable (Oracle) or Repeatable Read(MySQL, PostgreSQL)
+- problem with read commited
+  - read skew
+    - multiple object transaction, snapshot of both object may not be in sync
+    - like transfer transaction, there is a time when total money become less
+  - usually reload is fine
+  - but when backup, or run analytical queries, may cause issue
+- used
+  - PostgreSQL, mySQL with InnoDB, Oracle, SQL Server
+- Implementation
+  - reader never block writer, writer never block reader
+  - keep commit history of a object, data tagged with transaction ID
+  - define visible rules to present consistent snapshot
+
+#### Preventing lost updates
+- for concurrent writing transactions
+
+
 ### 7.3 Serializability
 
 ## 8. The Trouble with Distributed Systems
