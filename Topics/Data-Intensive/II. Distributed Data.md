@@ -266,11 +266,103 @@
     - but have to read from lots of nodes
 
 ### 6.3 Secondary Indexes
+
+#### 6.3.1 Document based
+
+- car sale website
+  - key: docID
+    - 191 -> {color:red. make:Honda, location:Palo Alto}
+  - secondaryL color, make
+    - color:red -> [191]
+
+- scatter/gather
+  - each partition is completely separate
+    - secondary index only cover that partition
+  - search query will send to all partitions
+    - read query can be expensive
+  - used in
+    - MongoDB, Riak, Cassandra, ElasticSearch, Solr, VoltDB
+
+#### 6.3.2 Term based
+
+- construct global index
+  - this index is also partitioned
+  - partition by term help scan/search
+- write is slower
+  - might effect multiple index partitions
+  - in practice, secondary index are often async
+- used in
+  - DynamoDB, Riak search feature
+
+
 ### 6.4 Rebalancing
+
+- Not to do: Hash mod N
+  - if N change, most record will move to another node
+
+- Fixed number of partitions
+  - 10 nodes and 1000 partitions
+  - when full, only entire partitions are moved
+  - used in Riak, ElasticSearch, Couchbase and Voldemort
+
+- Dynamic Partitioning
+  - use key range, can not move around
+  - split in half when full
+  - manually set partition when data is small
+  - used in HBase and RethinkDB
+
+- Proportional to nodes
+  - when new node join, random choose existing partition to split
+  - 256 partitions per node by default
+  - used in Cassandra and Ketama
+
 ### 6.5 Request Routing
 
+- Which partition should client connect to?
+- Service discovery problem
+  - 1. client contact any node, if not, forward to another node
+    - Cassandra and Riak use gossip protocol among nodes
+    - nodes will forward query
+  - 2. client contact routing tier, as load balancer
+    - Zookeeper
+    - LinkedIn's Espresso use Helix, rely on Zookeeper
+    - Kafka use Zookeeper
+    - MongoDB use own config server
+  - 3. client fetch metadata, and contact right node
+
+
 ## 7. Transactions
+
+> Some authors have claimed that general two-phase commit is too expensive to support, because of the performance or availability problems that it brings. We believe it is better to have application programmers deal with performance problems due to overuse of transac‐ tions as bottlenecks arise, rather than always coding around the lack of transactions.
+—__James Corbett__ et al., Spanner: Google’s Globally-Distributed Database (2012)
+
+- Transaction
+  - a way to group several reads & writes into a logical unit
+  - either entire transaction succeed or fails
+  - so application can safely retry when fail
+    - without worry about partial failure
+
 ### 7.1 Concept
+#### 7.1.1 ACID
+
+- safety guarantee provided by transaction
+  - Atomicity
+    - atomic: can not be broken down into smaller part
+    - transaction is atomic, if one of writes failed, whole transaction is aborted
+  - Consistency
+    - certain statements about your data must always be true
+    - like in accounting system, credits and debits are balanced
+  - Isolation
+    - transactions are isolated from each other
+  - Durability
+    - transaction succeed, the data will not be lost
+
+
+- Consistency is overloaded
+  - replica consistency: eventual consistency, replica become sync
+  - CAP theorem: Linearizability
+  - ACID: good state
+
 ### 7.2 Weak Isolation Levels
 ### 7.3 Serializability
 
