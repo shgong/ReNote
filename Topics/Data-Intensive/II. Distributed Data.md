@@ -512,7 +512,62 @@
 - bad performance
 
 
+- predicate lock
+  - if one transaction search for existing booking for a room within a window
+  - another transaction is not allowed to update another booking for the room/range
+- `SELECT * FROM bookings WHERE room=123 AND end_time>12 AND start_time <13`
+  - the lock belong to all objects that match certain conditions
+  - A read, acquire a shared-mode predicate lock on conditions of the query
+    - if B has lock on matching condition query, A must wait
+  - A write, first check if value match any existing predicate lock
+    - if B held the lock, A must wait
+
+
+- index-range lock
+  - predicate lock do not perform well
+    - check too much lock is time consuming
+  - simplify predicate
+    - predicate lock for room 123, noon and 1pm
+    - lock all room between noon and 1pm
+    - or lock room 123
+  - may lock bigger range of objects, but low overhead
+
+#### Serializable Snapshot Isolation
+
+- concurrency control
+  - serializability
+    - that don't perform well - 2PL
+    - that don't scale well - serial
+  - weak isolation with good performance
+    - that prone to race conditions
+      - lost update
+      - write skew & phantoms
+- SSI
+  - used in PostgreSQL 9.1+ and FoundationDB
+  - when a transaction want to commits, database check if anything bad happen
+    - if so, abort and retry
+    - otherwise, allow to commit
+  - perform badly when high contention, lots of abortion
+    - but with enough space capacity, will out perform 2PL & serial
+  - implementation
+    - on top of snapshot isolation
+    - add an algorithm for detecting serialization conflicts among writes
+
+- How to know if query result might have changed?
+  - detect stale MVCC object version (uncommitted write before read)
+    - track when A ignore B's write due to MVCC visibility rule
+    - when commit A, check whether any ignored writes have been commited
+      - why wait for commit? A might be read-only transaction
+  - detect writes affect prior reads
+    - A B both search for index entry, record the fact they read
+    - when A write, look in indexes for any other transaction read affected data
+      - similar to acquiring a write lock on key range
+
 ## 8. The Trouble with Distributed Systems
+
+- new and exiciting ways for things to go wrong
+- thoroughly pessimistic and depressing
+
 ### 8.1 Faults and Partial Failures
 ### 8.2 Unreliable Networks
 ### 8.3 Unreliable Clocks
