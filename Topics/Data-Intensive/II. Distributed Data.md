@@ -569,12 +569,182 @@
 - thoroughly pessimistic and depressing
 
 ### 8.1 Faults and Partial Failures
+
+- Cloud computing vs Supercomputing
+  - supercomputer with thousands CPU, weather forecasting or molecular dynamics
+  - cloud computing with multi-tenant datacenters, connected with IP network
+    - commodity computer, lower cost, higher failure rates
+
 ### 8.2 Unreliable Networks
+
+- internet and most internal networks in datacenters (Ethernet)
+  - are asynchronous packet network
+  - network gives no guarantees to requests
+  - only information is timeout
+- Faults in practice
+  - mid-sized datacenter found 12 network faults per month
+  - public cloud like EC2 are notorious for frequent transient network glitch
+  - well-managed private data center can be stabler
+- Detecting Faults
+  - Load balancer need to know when assign task
+  - single-leader replication, need promote follower
+- How
+  - TCP connection is refused
+  - node process crashed or killed, a script on OS can inform other nodes (HBase)
+  - network interface, query at hardware level to see power down
+  - or, time out
+- Time out
+  - detect faster, but may be just a slowdown
+  - when already with high load but just slow down, declare dead may deteorior the situation
+  - transfer load to other nodes cause cascading failure (every nodes declare each other dead)
+
+- Network congestion & queueing
+  - situation
+    - multiple nodes send packet to same direction
+    - when packet reach destination but all CPU core busy
+    - TCP flow control, node limit its rate of sending
+    - TCP consider packet lost and retransmitted
+  - TCP vs UDP
+    - UDP don't flow control, don't retransmit lost package
+    - useful when data is not valuable
+    - like video conference and VoIP
+
 ### 8.3 Unreliable Clocks
+
+- problems
+  - duration
+    - has this request time out?
+    - what is 99th percentile response time
+    - how many queries per second
+    - how long user stay
+  - points
+    - when was article published
+    - when to send reminder email
+    - when cache entry expire
+    - timestamp of error message
+- time is tricky
+  - network communication take time
+  - network may delay
+  - machine clock: quartz crystal oscillator are not perfect
+
+- Clock kind
+  - time-of-day
+    - seconds since epoch (midnight UTC on Jan 1, 1970)
+    - Java: System.currentTimeMillis()
+    - Linux: Clock_gettime(CLOCK_REALTIME)
+    - need synchronization with NTP server
+      - google assume a clock drift of 200 ppm
+      - 6ms/30s, or 17s/day
+      - leap second: let NTP server lie by split gradually among the day
+  - monotonic
+    - measure duration, or time interval
+    - Java: System.nanoTime()
+    - Linux: clock_gettime(CLOCK_MONOTONIC)
+
+- Synchronized clocks Problems
+  - timestamps for ordering event
+    - when two machine has time differnce of ms
+    - A write timestamp replicated to B, overwrite a later B update event
+    - use logical clock for ordering events
+      - safer, don't use real time, only relative order
+  - clock read interval
+    - ms digits is meaningless if precision on 100ms
+    - Google Spanner TrueTime API will report [earliest, latest]
+
+- Process Pauses
+  - only leader allowed to accept writes, how to know it is still leader?
+  - lease option
+    - leader obtain a lease from other nodes, like a lock with timeout
+    - leader must renew lease before expire
+    - `if (lease.expiryTimeMillis - System.currentTimeMillis() < 10000)`
+  - risk
+    - time window
+    - clock drift
+    - thread pause 15s due to
+      - GC
+      - VM suspend
+      - OS paging
+      - Unix Ctrl-Z SIGSTOP, then SIGCONT
+
 ### 8.4 Knowledge Truth and Lies
 
+
 ## 9. Consistency and Consensus
+
 ### 9.1 Consistency Guarantee
+
+- most replicated databases provide at least eventual consistency, or convergence
+  - weak guarantee, don't know when will converge
+  - also hard for application developers
+- stronger guarantees come with worse performance or less fault-tolerant
+
 ### 9.2 Linearizability
+
+- idea of linearizability
+  - also atomic consistency, strong consistency, immediate consistency, external consistency
+  - make the system appear as if only one copy of data, thus all operation are atomic
+
+- examples
+  - 3 clients concurrently read write the same key x
+    - read before write is 0, after write is 1
+    - read overlap write can be 0 or 1
+  - add constraint
+    - at some point, value of x atomically flip to 1
+    - after any read 1, all subsequent reads must be 1
+
+- why linearizability useful
+  - locking and leader election
+    - leader mechanic must be linearizable, all nodes agree which node owns the lock
+    - coordination service like ZooKeeper
+  - constraints and uniqueness guarantees
+    - username, positive balance, double book seats
+    - it is sometimes acceptable to overbook flight
+  - cross channel time dependencies
+
+- Implementation
+  - really use single copy of data - lol
+  - use single-leader replication
+    - ensure read from leader or sync follower
+    - may have split brain, delusional leader issue
+  - consensus algorithms
+    - similiar to single-leader, without split brain and stale replica
+    - used in ZooKeeper
+    - will explain later
+  - leaderless replication
+    - strict quorum seems to be linearizable
+      - with delay, possible to have race condition
+    - not linearizable
+
+- Cost of Linearizability
+  - cannot use multi-leader replication
+  - not efficient when network issue
+
+- CPU: RAM on modern multi-core CPU is not linearizable
+  - one core write to memory address, another core may not read the same
+    - unless memeory barrier/fence is used
+  - every CPU core has own memeory cache and store buffer
+    - so there are several copies of data
+
+#### CAP theorem
+
+- trade-off
+  - if require linearizability
+    - some replica disconnected from other replicas
+    - they become unavailable
+    - CP (not Available)
+  - if not require linearizability
+    - when disconnected, replica can be available
+    - AP (not consistent)
+  - or CA (not distributed, no replica)
+
 ### 9.3 Ordering Guarantees
+
+#### Ordering and Causality
+
+- conversation, answer and question
+- happend before relationship of concurrent writes A,B
+- read skew, snapshot violate causal relationship
+
+
+
 ### 9.4 Distributed Transactions and Consensus
