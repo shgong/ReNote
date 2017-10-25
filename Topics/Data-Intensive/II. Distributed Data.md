@@ -420,10 +420,97 @@
   - define visible rules to present consistent snapshot
 
 #### Preventing lost updates
+- above two: what read-only transaction can see
 - for concurrent writing transactions
+  - second write may not include first modification
+    - increase counter
+    - append element
+- atomic write operation
+  - many database provide such update operation
+  - concurrency-safe code
+    - `update counters SET value = value + 1 WHERE key = 'foo'`
+  - implementation
+    - take exclusive lock on object when it is reads
+    - force all atomic operation run on same thread
+  - ORM framework easily perform read-modify-write cycle, instead of atomic DB operation
+- explicit locking
+  - add an explicit lock to forbid other play move pawn
+  - `SELECT * FROM figures WHERE name='robot' AND game_id=222 FOR UPDATE`
+  - for update will lock on all rows returned by the query
+
+- CAS Compare-and-set
+  - provided in databases that don't have transaction
+  - provide read result as write condition
+  - `UPDATE wiki_pages SET content = 'new content'`
+  - ` WHERE id = 1234 AND content = 'old content';`
+
+- Replication
+  - lock and CAS assume there is single up-to-date copy
+  - replicated database allow concurrent writes create multiple version
+  - unfortunately, LWW is default in many replicated DB
+
+#### Write Skew and Phantoms
+
+- race conditions
+  - dirty writes
+  - lost updates
+  - write skew
+    - two transaction updating two different objects
+      - two doctor cancel on-call
+      - due to snapshot isolation, total count return 2 for both
+    - multiplayer game
+    - meeting room registration
+    - claiming unique username
+    - prevent credit double-spending
+
+- Phantoms
+  - a write in one transaction change result of another transaction
+
+- solution
+  - DB config constraints (most DB don't have)
+  - explicitly lock the rows
+    - `SELECT * FROM doctors WHERE on_call = true AND shift_id = 1234 FOR UPDATE;`
+
+- what if there is no object to which can attach lock?
+  - materializing conflicts (last resort)
+  - a serializable isolation is more preferable
 
 
 ### 7.3 Serializability
+
+- strongest isolation level
+  - guarantees parallel execution have serially effect correctly
+  - why not everyone use it?
+
+#### Actual Serial Execution
+
+- remove concurrency entirely, one transaction at a time, single thread
+- why the old way
+  - RAM price drop
+  - OLTP and OLAP separation
+- used
+  - VoltDB/H-Store, Redis, Datomic
+- serial execution requirements
+  - every transaction must be small and fast
+  - limitation that active dataset fit in memory
+  - write throughput must be low
+
+#### Two-Phase Locking 2PL
+
+- much stronger lock requirement than `no dirty writes`
+  - if A read, B want write, B wait until A commits or aborts
+  - if A write, B want read, B wait until A commits or aborts
+- contrary to snapshot isolation (read never block write)
+
+- implementation
+  - have a lock on each object in the database
+  - read acquires the lock in shared mode
+  - write acquires the lock in exclusive mode
+  - read=>write will upgrade the lock
+  - lock continue hold until end of transaction (commit/abort)
+- deadlock may happen easily
+- bad performance
+
 
 ## 8. The Trouble with Distributed Systems
 ### 8.1 Faults and Partial Failures
