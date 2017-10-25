@@ -495,7 +495,7 @@
   - limitation that active dataset fit in memory
   - write throughput must be low
 
-#### Two-Phase Locking 2PL
+#### Two-Phase Locking (2PL)
 
 - much stronger lock requirement than `no dirty writes`
   - if A read, B want write, B wait until A commits or aborts
