@@ -740,11 +740,99 @@
 ### 9.3 Ordering Guarantees
 
 #### Ordering and Causality
+- examples
+  - conversation, answer and question
+  - happend before relationship of concurrent writes A,B
+  - read skew, snapshot violate causal relationship
+  - write skew, go off call
+- a causal order is not a total order
+  - linearization system have total order
+  - causal order can be uncomparable, partial order
+    - better performed linearization
+    - git version history is like graph of causal dependency
+- detect happend-before relationship
+  - like in leaderless datastore, detect writes to same key to prevent lost updates
+  - causality goes further: track depencies across entire db, than single key
+    - thus need version vectors
+    - previous version record, like git history approach
 
-- conversation, answer and question
-- happend before relationship of concurrent writes A,B
-- read skew, snapshot violate causal relationship
+#### Sequence Number Ordering
+
+- explicit tracking all data would mean a large overhead
+  - better ways
+    - use sequence numbers or timestamps
+    - time can be from logical clock, as incremental counters
+  - single-leader replication log define a total order with log counter
+- when multi-leader, leaderless, partitioned
+  - naive solution
+    - each node generate own set of sequence number, with uniqueID to differentiate
+    - attach timestamp from physical clock (may not sequential, need high resolution)
+  - problem
+    - number generated not consistent with causality
+  - Lamport timestamps (1978)
+    - each node has unique identifier
+    - each node keeps counter of number of operations processed
+    - Lamport timestamp (counter, nodeID)
+      - compare counter, then nodeID
+    - if a node receive request/response with maximum counter value greater than its own value
+      - it immediately increase to that value
+    - lampaort is total ordering though, it is more compact than version vectors
+- order is not sufficient
+  - in username problem, both can not decide uniqueless
+  - total order only emerges after you collected all operation
+  - they don't know causality independently
+
+#### Total order broadcast
+
+- single-leader replication is most powerful at ordering
+  - the challenge is throughput greater than leader can handle
+- total order broadcast
+  - a protocol for exchanging messages between nodes
+  - requires
+    - reliable delivery: no message lost
+    - totally ordered delivery: to every node in same order
+  - consensus service like Zookeeper and etcd implement that
+- usage
+  - database replication: state machine replication
+  - serializable transaction: every node process message in same order
+  - implement lock service that provides fencing tokens
+- order is fixed at the time messages delivered, can not insert
+- it is like a way of creating log
 
 
+- Implementation
+  - in linearizable system, there is total order of operation
+    - not quite same as total order broadcast, but have close links between the two
+  - total order broadcast is async, no guarantee when a message will be delivered
+    - linearizable is recency guarantee: read is guaranteed to see latest value written
+    - with total order broadcast, you can build linearizable storage on top of it
+  - imagine for every username, have a linearizable register with atomic cas operation
+    - null, then set to accountID, with linearizable guarantee, username unique is guaranteed
+- broadcast as append-only log
+  - append message to log with your username
+  - read log and wait for message deliver back
+  - check messages, if first is your own message, succeed, else abort
+    - when concurrent write, refer to same log can ensure linearazble write
+
+- algorithm
+  - for every message you want to send through total order broadcast
+    - increment-and-get linearizable integer
+    - attach value from register as sequence number to th message
+    - send the message to all nodes
+  - thus even message 6 arrived earlier, node will still wait for message 5
+    - unlike lamport, they won't wait, only merge afterwards
 
 ### 9.4 Distributed Transactions and Consensus
+
+- most import and fundamental problem
+  - get several nodes to agree on something
+  - like
+    - leader election
+    - atomic commit
+  - to avoid split history
+
+- FLP result
+  - Fisher, Lynch and Paterson
+  - no algorithm that always reach consensus if node may crash
+  - proved in async system model, that don't use timeout & clocks
+  - so it is actually solvable with timeout and crash detection
