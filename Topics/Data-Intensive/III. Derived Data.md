@@ -98,8 +98,32 @@ top5.each{|count, url| puts "#{count} #{url}" }
       - skewed join in Hive specify hot key in metadata, thus separate files
         - hot key use map-side join
 
-- map-side join
+- reduce-side join
+  - you don't need to make any assumptions about input data
+  - but sorting, copying, merging reducer inputs can be quite expensive
+- map-side join make some assupmption about input data, to make join faster
+  - with no reducer, no join
 
+- map-side join
+  - broadcast hash join
+    - large join small
+    - if small enough to fit in memory of each mappers
+    - used in
+      - Pig replicated join
+      - Hive MapJoin
+      - Cascading
+      - Crunch
+      - Impala
+  - partitioned hash join
+    - if inputs to map-side join partitioned in the same way
+    - like partitioned based last 3 digit of userID, with same num of partitions
+    - known as bucketed map joins in Hive
+  - map-side merge joins
+    - if both paritioned and sorted in the same way
+    - merge join is very fast
+
+
+- Hadoop vs Distributed DB
 
 ### 10.3 Beyond MapReduce
 
