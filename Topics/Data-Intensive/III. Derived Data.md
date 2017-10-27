@@ -275,6 +275,21 @@ top5.each{|count, url| puts "#{count} #{url}" }
 
 #### Change Data Capture
 
+- most DB replication log is internal implementation, not public API
+  - difficult to replicate to other systems
+  - recently, CDC make changes available as a stream
+    - also makes one DB the leader, rest follower
+  - used in
+    - Linkedin's Databus
+    - Facebook's Wormhole
+    - Yahoo!'s Sherpa
+    - Bottled Water for PostgreSQL
+    - Maxwell and Debezium for MySQL
+    - Mongoriver for MongoDB
+    - GoldenGate for Oracle
+
+- Log compaction
+
 
 #### Event Sourcing
 
