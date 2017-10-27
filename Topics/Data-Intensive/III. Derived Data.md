@@ -212,7 +212,59 @@ top5.each{|count, url| puts "#{count} #{url}" }
 
 #### Paritioned logs
 
+- log-based message broker
+  - if add new consumer to messaging system, only start receiving message later
+  - if add new client to db, can read data long in the past
+  - is hybrid option possible?
+
+- structure
+  - producer append message to log
+  - consumer read log sequentially, `tail -f` when finished
+  - add partition for higher throughput
+    - within each partition, broker assigns offset to every message
+    - though no order guarantee across partitions
+- used in
+  - Apache Kafka, Amazon Kinesis Streams, Twitter DistributedLog
+
+
+- Compared to traditional messaging
+  - trivially support fan-out
+  - load balancing
+    - assign entire partition to nodes in the consumer group
+    - each consumer process assigned log partition
+  - downside
+    - consumer can not exceed log partition number
+    - single message delay hold up processing of whole partition
+  - use traditional messaging when
+    - message takes time to process
+    - ordering is not so important
+
+
+- consumer offsets
+  - consumer know processed or not from the offset
+    - don't track Acknowledgement
+    - periodically record offset is fine
+  - similar to log sequence number in single-leader database replication
+    - the number allow disconnected follower to resume replication writes
+
+
+- disk space usage
+  - log will eventually run out of disk space
+    - delete old segment from time to time
+    - circular buffer or ring buffer
+  - if a consumer is too slow, may miss some messages
+    - 6TB hard disk, 150MB/s throughput -> 11h lagging is enough for manual fix
+
+- replaying old messages
+  - as long as log is available
+  - can reset consumer id to repeat
+
 ### 11.2 Database and Stream
+
+#### Keep Systems in Sync
+
+
+
 ### 11.3 Processing Streams
 
 ## 12. The Future of Data Systems
