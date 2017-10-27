@@ -276,6 +276,11 @@ top5.each{|count, url| puts "#{count} #{url}" }
 #### Change Data Capture
 
 
+#### Event Sourcing
+
+
+#### States, Streams and Immutability
+
 
 ### 11.3 Processing Streams
 
