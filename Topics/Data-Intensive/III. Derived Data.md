@@ -122,10 +122,33 @@ top5.each{|count, url| puts "#{count} #{url}" }
     - if both paritioned and sorted in the same way
     - merge join is very fast
 
-
 - Hadoop vs Distributed DB
+  - diversity of storage
+    - structure data to particular model
+    - byte sequence
+  - diversity of processing models
+    - efficient on designed type queries, SQL, graphical analyst
+    - more general data processing
+  - designing for frequent Faults
 
 ### 10.3 Beyond MapReduce
+
+- Materialization of intermediate state
+  - have to configure first output as second input
+  - in many case it is just intermediate file
+  - have downside compared to unix
+    - MR job can start only when preceding jobs completed
+    - mappers are often redundant, read back the same file
+    - 3 replication for intermediate data is a overkill
+
+- New execution engines
+  - Dataflow engines
+    - Spark
+    - Tez
+    - Flink
+  - arrange oeprators as DAG
+  - iterative processing
+  - high level API and languages
 
 ## 11. Stream Processing
 ### 11.1 Transmitting Event Stream
