@@ -1,4 +1,4 @@
-# Data Lecture Notes 
+# Data Lecture Notes
 
 8:00pm EST, 2016.04.28
 
@@ -17,7 +17,7 @@
 - 主要工作内容
     + Streaming ETL
     + Data Migration
-    + 写 Java Code 为主 
+    + 写 Java Code 为主
         * framework: 企业自带的，和你自己设计的一套
         * consumer
         * report
@@ -66,7 +66,7 @@
     + Comcast: Spark Standalone
 
 - 有钱任性
-    + Goldman Sachs 
+    + Goldman Sachs
         * HDFS和YARN都独立开节点
         * 12个节点的cluster只跑一个HBase
         * 反正都在公司内部交流，nj一批机器，华盛顿一批机器，互相读其实也没多少延迟
@@ -81,10 +81,10 @@
 - 公司一般都是大量实时生成数据
 - 数据格式
     + JSON
-        * 常见但是很少用  
+        * 常见但是很少用
         * Human readable, High Data Transfer Cost
     + Avro/Protocol Buffer
-        * 网络花费小一点  
+        * 网络花费小一点
         * 分两部分 Schema + Binary 组合成 JSON
     + Example: 一年前用的json format，现在的api无法解析，两种办法
         * 先判断新旧版本，再用java转换api，效率巨低
@@ -115,7 +115,7 @@
     + rowkey设计巨难
     + 什么都能连 rest spark java
 - Data Integration Example
-    + 设计一个rowkey (用户信息，买的东西) 
+    + 设计一个rowkey (用户信息，买的东西)
     + 存在不同column family，可以一起取
 - 准备
     + 不用在意 zookeeper 结构
@@ -150,7 +150,7 @@
 - 通常写好了jar包，有专门的 MC team 负责怎么运行，出错了怎么办
 - 一般公司都有自己的 Scheduler，并没有用 Oozie
     + Goldman Sachs: SLANG (SecDB)
-    + BoA: PHP 
+    + BoA: PHP
     + Comcast: Manual?
 
 ### 3.5 其他
@@ -167,47 +167,3 @@
     + HBase 写一个 Custom Coprocessor，提交后，如果看不懂，不会允许运行的
 - SQL: 只有Spark一起用的一个memSQL，和 Spark 一样内存溢出也不好使了
 - Multithreading: 从来用不到
-
-
-
-## 4. Interview
-
-- Resume
-    + project description
-        * build big data platform 
-        * ETL+messaging system
-        * replacing old system, old database
-    + ETL
-    + cleaning
-    + report
-    + consumer
-    + kerberos
-    + 可以写一条 Business Logic / AI，不要多
-
-- 面试官
-    + VP/MD/AP: 90% experience 8% personality 2% tech
-    + Associate/Primary Engineer: 90% tech 10% rest
-
-- 内容
-    1. 经历：你上个project干嘛
-    2. 不懂：讲一讲hadoop吧（虚心的学
-    3. 概念：概述 MapReduce 的思想（很难答
-    4. 算法：leetcode简单题
-    5. 场景：实际scenario，怎么实现，有个思路就好
-
-- Example
-    + 用什么数据库？
-        * self-developed RDBMS
-        * cannot say about details 
-        * 你知道 SLANG 和 SecDB 么?
-    + Business Logic
-        * 无可奉告，这个告诉你是违法的 
-        * 我也不知道，BI team 有 schema，我没有
-    + HDFS HBase Capacity
-        * 怎么这个你也问，你怎么这么菜，鄙视
-        * 只用保证7年不用换数据库就行了，你们数据有多大
-    + 有机会可以多带出来一些细节
-
-- 进去后多问
-    + 不会就问，都有人告诉你的，这是干什么，要申请什么权限，你们怎么运作
-    + 别问节点怎么登陆就行，问节点host authentication，找谁申请access

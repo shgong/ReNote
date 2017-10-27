@@ -1,4 +1,4 @@
-# Data Lecture Notes 
+# Data Lecture Notes
 
 8:00pm EST, 2016.04.28
 
@@ -17,14 +17,14 @@
 - Main
     + Streaming ETL
     + Data Migration
-    + Java Code 
+    + Java Code
         * framework
         * consumer
         * report
         * mapreduce
-    + Task Management: Agile 
+    + Task Management: Agile
 - Notice
-    + Autentication，use Kerberos to communicate, key-cache 
+    + Autentication，use Kerberos to communicate, key-cache
     + Consumer Design: code reuse, structure
     + HBase: Interval setting, HTable Interface, Buffer setting
 
@@ -63,7 +63,7 @@
     + Comcast: Spark Standalone
 
 - Companies are rich
-    + Goldman Sachs 
+    + Goldman Sachs
         * HDFS and YARN have independent node
         * 12-node cluster only run HBase
     + Comcast have Nifi cluster
@@ -75,10 +75,10 @@
 
 - Data format
     + JSON
-        * rarely used 
+        * rarely used
         * Human readable, High Data Transfer Cost
     + Avro/Protocol Buffer
-        * lower transfer cost 
+        * lower transfer cost
         * Schema + Binary => JSON
     + Example: json format changed last year
         * use conversion api in java
@@ -96,7 +96,7 @@
 
 - think twice about logic
 - ensure Map output and Reduce input are serializable
-    + inherit Writable 
+    + inherit Writable
     + data cannot be serialized error
 - code looks nasty when complexity grows
 
@@ -119,12 +119,12 @@
     + Large memory consumption, memory not large enough for 10+TB data
     + have hard disk mode, but no one use that (mapreduce)
     + less stable than MR when using Kerberos
-    
+
 - Use Case
     + common Jobs that MapReduce can do
     + ETL/data cleaning/report
     + will do spark streaming and memSQL
-    + very few Machine Learning things 
+    + very few Machine Learning things
 
 - Data Cleaning
     + column missing
@@ -133,10 +133,10 @@
 
 
 ### 3.4 Scheduler
-- send jar file to MC team 
+- send jar file to MC team
 - big company have their own Scheduler，not using Oozie
     + Goldman Sachs: SLANG
-    + BoA: PHP 
+    + BoA: PHP
     + Comcast: Bash?
 
 ### 3.5 Others
@@ -151,35 +151,3 @@
     + example: write a HBase Custom Coprocessor
     + MC team do not understand how it works
     + not permit to run, a waste of time
-
-
-## 4. Interview
-
-- Resume
-    + project description
-        * build big data platform 
-        * ETL+messaging system
-        * replacing old system, old database
-    + ETL
-    + cleaning
-    + report
-    + consumer
-    + kerberos
-    + add one line of Business Logic / AI at the end
-
-- Interviewer
-    + VP/MD/AP: 90% experience 8% personality 2% tech
-    + Associate/Primary Engineer: 90% tech 10% rest
-
-- Interview
-    1. Experience: last project
-    2. Idea: Explain what is MapReduce (not easy to answer
-    4. Algorithm: mostly easy 
-    5. Scenario: design application in a given situation
-
-- Example
-    + What database do you use
-    + Business Logic
-        * sometime it is illegal to tell
-    + HDFS HBase Capacity
-        * 200 node, large enough
