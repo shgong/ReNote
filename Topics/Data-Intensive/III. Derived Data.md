@@ -263,6 +263,18 @@ top5.each{|count, url| puts "#{count} #{url}" }
 
 #### Keep Systems in Sync
 
+- data warehouse synchronization between db, cache, search index
+  - usually performed by ETL process
+  - if periodly full dump are too slow, can use dual writes
+    - application code explicitly write to each Systems
+    - but with serious problem
+      - race condition between clients
+      - one of writes may fail, thus inconsistent
+- the situation would be better if there really was only one leader
+  - can we make search index a follower of database?
+
+#### Change Data Capture
+
 
 
 ### 11.3 Processing Streams
