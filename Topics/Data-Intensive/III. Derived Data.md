@@ -329,6 +329,22 @@ top5.each{|count, url| puts "#{count} #{url}" }
 
 ### 11.3 Processing Streams
 
+- once you have stream, you can
+  - take data in events and write it to storage systems
+  - push events to users, like notification, dashboard, emails
+  - process 1-n input stream and produce 1-n stream
+
+#### Uses of stream processing
+
+
+#### Reasoning about time
+
+
+#### Stream joins
+
+
+
+#### Fault tolerance
 
 
 
