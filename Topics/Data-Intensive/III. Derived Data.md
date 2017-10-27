@@ -289,15 +289,48 @@ top5.each{|count, url| puts "#{count} #{url}" }
     - GoldenGate for Oracle
 
 - Log compaction
-
+  - LSM-Tree will periodically looks for log records with same key, keep recent
+    - update with special null value (tombstone) means key delete
+  - the same for log-based message broekrs
+  - if CDC set up every change has primary key, every update replace previous value
+    - can just keep most recent write
+  - supported by Kafka
 
 #### Event Sourcing
 
+- also store all changes to application state as log of events
+  - at different level of abstraction than CDC
+    - CDC: mutable db, extract log at db low level
+    - ES: use immutable events written  to event log, happened at application level
+      - easier to understand, evolve and debugging
+- derive current state
+  - event log by itself is not useful
+  - need to transform to application state, replay (like game replays)
+  - can not use compaction for events
+- also store snapshot for faster recovery
 
 #### States, Streams and Immutability
 
+- derive multiple view from same event log
+  - different read-oriented representations
+    - Druid, Pistachio, Kafka Connect
+  - explicit translation step: event log to db
+    - help evolve your application over time
+    - new feature introduced
+
+- concurrent control
+  - consumer of event log are async
+  - ueser may write record, and not found in read
+    - Reading your own writes (also a replication problem)
+  - 1. update read view synchronouosly with appending event to the log
+    - require transaction, make it atomic
+  - 2. event help concurrent problem
+    - wrap write to name, age, info into an atomic event
 
 ### 11.3 Processing Streams
+
+
+
 
 ## 12. The Future of Data Systems
 ### 12.1 Integration
