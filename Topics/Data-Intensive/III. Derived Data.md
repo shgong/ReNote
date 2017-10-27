@@ -151,7 +151,67 @@ top5.each{|count, url| puts "#{count} #{url}" }
   - high level API and languages
 
 ## 11. Stream Processing
+
 ### 11.1 Transmitting Event Stream
+
+- in stream processing context
+  - a record is an event
+    - encoded
+    - from producer to consumer
+    - grouped into topic or stream
+
+
+#### Messaging System
+
+- Unix pipes and TCP connect
+  - basic model with one sender and one recipient
+
+- 1. What if producers send messages faster?
+  - drop messages
+  - buffer messages in a queue
+    - what happened as queue grows
+      - crash
+      - write to disk
+      - how disk access affect performance
+  - apply back pressure (flow control)
+    - like TCP have small fixed buffer, will block producer if full
+- 2. What if node crash? Message lost?
+  - if you can accept lose message, you can get higher throughput and lower latency
+  - vary by systems: sensor or security
+
+
+- Direct messaging from producer to consumers
+  - UDP multicast used in financial industry -> low latency
+  - Brokerless messaging like ZeroMQ and nanomsg, use TCP or IP multicast
+  - StatsD and Brubeck use UDP for metrics
+  - webhooks use HTTP or RPC, with consumer exposing services
+- Message brokers
+  - alternative: send via message queue, streaming database
+  - with broker, durability issue goes to broker instead
+    - keep in memory, or write to hard disk in case crashed
+  - queueing also make consumers async
+- Broker vs Database
+  - quick deletion
+  - small buffer, degrade if full
+  - topic subscription
+  - don't support query, notify when data change
+- Multiple Consumer: two main patterns
+  - load balancing
+    - each message deliver to one of consumers
+    - when message is expensive to process
+    - add consumer to parallel
+  - fan-out
+    - each message deliver to all consumers
+    - broadcasting message
+    - when different job consume same file
+- Acknowledgement and redelivery
+  - how to know if message is lost
+  - Acknowledgement: client explicitly tell broker when finish processing a message
+  - redeliver may break the message order
+
+
+#### Paritioned logs
+
 ### 11.2 Database and Stream
 ### 11.3 Processing Streams
 
