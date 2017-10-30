@@ -413,7 +413,49 @@ top5.each{|count, url| puts "#{count} #{url}" }
 ## 12. The Future of Data Systems
 ### 12.1 Integration
 
+- Batch and Streaming
+  - distinction begin to blur
+    - Apache Spark performs streaming on top of batch processing
+    - Apache Flink perform batch on top of streaming
+  - maintaining derived state
+    - batch processing have functional flavor
+      - deterministic, pure functions, immutable input and append-only output
+  - the lambda architecture
+    - if batch processing is used to process historical dat
+    - if stream processing is used to process recent updates
+    - idea of lambda architecture
+      - incoming data should be recorded by appending immutable events to growing dataset (like event sourcing)
+      - from these events, read-optimized views are derived
+      - stream processor quickly produce approximate update to the view
+      - batch processor later consume same event and produce correct update
 
 ### 12.2 Unbundling Databases
-### 12.3 Correctness
-### 12.4 Do the Right thing
+
+- Composing Data Storage Techniques
+  - Secondary index, search for fields efficeintly (from indexing)
+  - materialized views, precomputed cache of query results (from data cubes)
+  - replication logs
+  - full-text search index
+
+- design application around workflow
+   - secondary index is a kind of derived dataset
+   - a full-text search is created by applying NLP functions, followed by lookup data structure
+   - in ML system, model is derived from training data, and derive output from input
+   - cache contain aggregation to update according to UI
+
+- trend of breaking down functions into set of services of REST API
+  - composing stream operators into dataflow systems => similiar
+  - but one-directional, async messages
+
+### 12.3 Do the Right thing
+
+- predictive analytics
+  - may have direct effect on individual people's lives
+  - bias and discrimination
+  - responsibility and accountability
+  - feedback loops
+- privacy and tracking
+  - surveillance
+  - consent and freedom of choice
+  - data as assets and power
+  - legislation and self-regulation
