@@ -359,7 +359,51 @@ two linked list can be deep eq but not shallow.
 - Min-in-max algorithm
   - if side=computer find max
   - if side=human find min
+- alpha-beta prune
 
 ## 17. Encapsulation
 
-- module: set of methods that work together to perform some task
+- module
+  - set of methods that work together to perform some task
+  - It is Encapsulated
+    - if implementation is hidden
+    - accessed only through documented interface
+- Why Encapsulation
+  - implementation is independent from functionality
+  - prevent doug from module internal state change
+  - ADT guarantee invariant presearch
+  - Teamwork
+  - Documentation & maintainbility
+- document
+  - list all modules
+  - for each module, specify its interface
+    - behavior comment, parameter and return value
+  - unusually or errorous input/circumstance
+
+## 18. Encapsulated list
+
+- list
+  - isEmpty
+  - insertFront
+  - Front
+- listNode
+  - item
+  - next
+  - remove
+  - insertAfter
+
+## 19. Asymptotic Analysis
+## 20. Algorithm Analysis
+
+- Big O Analysis (at least this good)
+- Big Omega Analysis (at least this bad)
+
+- Give a set of p points, find their closest to each other
+  - Calculate distance between every pair, return minimum
+  - p(p-1)/2 pair
+  - Time ~ O(p^2) Ω(p^2)
+- Matchmaking for w women and m man
+  - running time T(w,m) ~ O(wm)
+- Array contains n music albums, sort by title, get k album starting with "Best of"
+  - bsearch O(logn + k), iterate k from lowerbound
+  - no simple expression, k can be 0 or n
