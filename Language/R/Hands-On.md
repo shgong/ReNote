@@ -147,7 +147,47 @@ die
 
 
 Matrices
+- store values in 2d array
 
+```
+m <- matrix(die, nrow = 2)
+m
+## [,1] [,2] [,3]
+## [1,] 1 3 5
+## [2,] 2 4 6
+
+## fill by row
+m <- matrix(die, nrow = 2, byrow = TRUE)
+m
+## [,1] [,2] [,3]
+## [1,] 1 2 3
+## [2,] 4 5 6
+```
+
+
+- change dimensional value will not change type of object
+- but it change class of object
+  - `class(dice)` matrix
+  - `class(1)` numeric  (return type if don't have class attribute)
+  - `class("Hello")` character
+
+
+Factor
+- R way of store categorical information
+
+```
+gender <- factor(c("male", "female", "female", "male"))
+
+typeof(gender)
+## "integer"
+
+attributes(gender)
+## $levels
+## [1] "female" "male"
+##
+## $class
+## [1] "factor"
+```
 
 ## 4. R Notation
 ## 5. Modifying Value
