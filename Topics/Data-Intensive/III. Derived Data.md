@@ -336,20 +336,84 @@ top5.each{|count, url| puts "#{count} #{url}" }
 
 #### Uses of stream processing
 
+- categroy
+  - fraud detection system
+  - trading system
+  - manufacturing system
+  - military and intelligence system
+- complex event processing
+  - event pattern search, with SQL or graphical UI
+  - when match is found, emit complex event
+- stream analytics
+  - boundary between CEP and stream is blurry
+  - analytics tends to be less interested in specific event, more towards aggregation & stat metrics
+  - rate, rolling average, time window
+  - use probabilistic algorithms, like Bloom filters
+- maintain materializaed views
+  - caches, search indexes, data warehouses
+- message passing and RPC
+  - we don't think message passing system as stream processors
+    - actor frameworks are mechanism for managing concurrency, not data management
+    - communication between actor is 1 to 1
+    - actor can communicate in arbitrary way, not as pipeline
+  - RPC and stream
+    - apache storm has feature called distributed RPC
 
 #### Reasoning about time
+
+- Event time vs processing time
+  - processing delay is common
+  - measure rate by processing time may have very low rate when restart
+- Defining windows
+  - you never sure when you received all of events for particular window
+  - options
+    - ignore straggler events
+    - publish a correction
+    - if there is only one generator:
+      - can put a message like: from now on there will be no more messages with a timestamp earlier than t
+- whose clock are you using
+  - adjust incorrect device clock
+    - when event happened, according to device clock
+    - when event sent to server, according to device clock
+    - when event received by server, according to server clock
+- Types of windows
+  - tumbling window
+  - hopping window
+  - sliding window
+  - session window
 
 
 #### Stream joins
 
+- Stream-stream join (window join)
+  - search or advertising trends
+  - a stream processor needs to maintain state
+    - all events indexed by ID for last hour, indexed by session ID
+  - whenever search event occurs
+    - add to appropriate index
+    - check other index for same session ID
+    - if match, emit event saying which search result clicked
+    - when session end, emit event saying which search results were not clicked
 
+- Stream-table join
+  - batch job joining two datasets
+    - a set of user activity events
+    - a db of user profiles
+  - how about augment a stream?
+    - query database, slow, risk overloading db
+    - preload small db and do map-side join
 
-#### Fault tolerance
-
-
+- Table-table join (materialized view maintenn)
+  - twitter example
+    - cannot iterate all following, want a timeline cache instead
+    - when user n send new tweet, add to timeline of followers
+    - when user u start follow user v, add v recent timeline to u
+  - act like a join query
 
 ## 12. The Future of Data Systems
 ### 12.1 Integration
+
+
 ### 12.2 Unbundling Databases
 ### 12.3 Correctness
 ### 12.4 Do the Right thing
