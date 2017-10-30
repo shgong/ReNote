@@ -407,3 +407,123 @@ two linked list can be deep eq but not shallow.
 - Array contains n music albums, sort by title, get k album starting with "Best of"
   - bsearch O(logn + k), iterate k from lowerbound
   - no simple expression, k can be 0 or n
+
+## 21. HashTable
+
+- dictionary
+- hash table
+  - hash huge set of n possible keys into N buckets
+  - with a compression function
+    - mod function
+  - chaining: each bucket reference a linked list of entries
+- Load factor of hashTable n/N
+  - if n>>N: O(n)
+  - otherwise: O(1)
+- choices of hash function
+  - int
+    - mod 4: easily skew
+    - (a * hashcode + b) mod p mod N
+  - words
+    - first 3 letters
+    - sum of ascii
+    - suppose prime modulus to 127
+- store minimax results in hashtable to reduce generation
+
+## 22. Stack and Queue
+
+- Easily implemented with linked list
+  - sample parenthesis matching
+    - scan through string
+    - push lefty onto stack
+    - when righty, pop counterpart off stack
+
+## 23. Trees and Traversals
+
+- Tree
+- Tree Traversals
+  - preorder: node-left-right
+    - recursive
+  - postorder: left-right-node
+    - recursive
+  - inorder: left-node-right
+    - recursive
+  - level order: root-1 level-2 level...
+    - dequeue, visit, enqueue children
+
+## 24. Priority Queues
+
+- Priority Queue
+  - dictionary that store entries
+  - a total order is defined on the keys
+  - operations
+    - identify or remove entry whose key is lowest
+    - any key may be inserted at any time
+
+- Binary Heap: a complete binary tree
+  - every row is full except bottom row
+  - no children has key less than parent
+- example
+  - stored in array directly, leave first empty (help index)
+  - 2, 5 3, 9 6 7 4
+  - mapping of node to indices: level numbering
+    - node i's chilren are 2i and 2i+1
+    - i's parent is floor(i/2)
+- entry insert
+  - if not full, put in first free spot from left
+  - then bubble up the tree until heap-order property satisfied
+    - keep swap with its parent
+- remove min
+  - fill hole with last entry in the tree
+  - still has the property that left, right children are binary heap
+  - just need to check top of each to find the min key
+    - after swap, need check the branch recursive until it is right
+
+- running times
+  - binary heap: min O(1), insert O(logn), remove O(logn)
+  - sorted list: min O(1), insert O(n),    remove O(1)
+  - unsort list: min O(n), insert O(1),    remove O(n)
+- why logn: tree levels
+
+
+## 25. Binary Search Tree
+
+- Ordered dictionary
+  - dictionary in which keys have total order, like heap
+- Binary search tree implementation
+  - every key in left subtree <= x's key
+  - every key in right subtree >= x's key
+  - inorder traversal will be sorted order
+- skew O(n), balanced O(logn)
+
+## 26. Balanced Search Trees
+
+- BST
+  - 2,3,4 Tree
+  - SPlay Tree
+  - AVL Tree
+  - Red-black Tree
+  - B Tree
+
+2,3,4 Tree
+- Property
+  - every node has 2,3 or 4 children, except leaves
+  - every node stores 1,2 or 3 keys
+    - 3 keys means 4 children
+    - subtree are placed according to greater/smaller keys
+- Insert
+  - walk down tree in search of k
+  - if finds k, proceeds to k's "left" child and continue
+  - when reach leaf, insert it
+  - if leaf exceed 3 item, how to restructure?
+    - break up by kicking middle key up
+      - recursive kick up
+      - root node (20 - 40 - 50) will kick into a new level (40)
+- Remove
+  - find key k
+  - if in leaf, remove it
+  - if internal node, replace with next higher key
+    - that key will be in leaf node,
+  - what if leaf has no items, how to restructure?
+    - try steal from a sibling, rotate
+    - if no adjacent has >1 keys, try steal key from parent, fusion with sibling
+    - if parent is root, merge with sibling, tree depth decrease
