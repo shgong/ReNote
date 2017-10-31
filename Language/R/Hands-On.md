@@ -310,20 +310,38 @@ mean(vec, na.rm=TRUE)  ## 25.5
 ## compare with NA will be NA
 c(1,2,3,NA)==NA     ## NA NA NA NA
 is.na(c(1,2,3,NA))  ## FALSE FALSE FALSE TRUE
-
 ```
-
-
-
 
 
 
 ## 6. Environments
 
+```
+## explore env tree
+as.environment("package:stats")
+
+## access from certain env
+head(globalenv()$cards, 3)
+assign("new", "Hello Global", envir = globalenv())
+```
+
 
 ---------------------------------------------------------------
 
 # III. Slot Machine
+
+SLOT Machine in Casinos
+```
+play()
+## 0 0 DD
+## $0
+
+play()
+## 7 7 7
+## $80
+```
+
+
 ## 7. Programs
 
 ## 8. S3
