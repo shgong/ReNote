@@ -268,6 +268,52 @@ lst[[1]]
 
 ## 5. Modifying Value
 
+```r
+vec[1]<-1000
+
+## update multiple value
+vec[c(1, 3, 5)] <- c(1, 1, 1)
+
+## create value do not yet exist
+vec[7] <- 0
+
+
+cards$value[c(13,26,39,52)]
+## 1 1 1 1
+## assign higher value for ace
+cards$value[c(13,26,39,52)] <- 14
+```
+
+Logical filters
+
+```r
+1 %in% c(3,4,5)       ## false
+c(1,2) %in% c(2,3,4)  ## false true
+cards[1:3,]$face == "king"   ## TRUE FALSE FALSE
+sum(cards$face == "ace")     ## 4  (interpret as 1 or 0)
+cards$value[cards$face == "ace"] <- 14     ## better assign
+
+## boolean operation
+queenOfSpades <- cards$face == "queen" & cards$suit == "spades"
+## FALSE TRUE FALSE ...
+## boolean list as a filter
+cards$value[queenOfSpades] <- 100
+```
+
+Missing Information: NA
+```
+## if one value is NA, average will be NA
+vec <- c(NA, 1:50)
+mean(vec)  ## NA
+mean(vec, na.rm=TRUE)  ## 25.5
+
+## compare with NA will be NA
+c(1,2,3,NA)==NA     ## NA NA NA NA
+is.na(c(1,2,3,NA))  ## FALSE FALSE FALSE TRUE
+
+```
+
+
 
 
 
