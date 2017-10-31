@@ -189,8 +189,89 @@ attributes(gender)
 ## [1] "factor"
 ```
 
+
+List
+- group data into one-dimensional set
+- unlike atomic vector, group individual values
+- list group together R objects, like vectors and other list
+
+```
+list1 <- list(100:130, "R", list(TRUE, FALSE))
+```
+
+
+Data Frames
+- 2d version of a list
+- group vectors into a 2d table
+- actually it is a list with class `data.frame`
+- default store string as Factors
+  - can disable by `stringAsFactors=FALSE`
+
+```
+df <- data.frame(face = c("ace", "two", "six"),
+                 suit = c("clubs", "clubs", "clubs"),
+                 value = c(1, 2, 3))
+
+
+deck <- data.frame(
+face = c("king", "queen", "jack", "ten", "nine", "eight", "seven", "six",
+"five", "four", "three", "two", "ace", "king", "queen", "jack", "ten",
+"nine", "eight", "seven", "six", "five", "four", "three", "two", "ace",
+"king", "queen", "jack", "ten", "nine", "eight", "seven", "six", "five",
+"four", "three", "two", "ace", "king", "queen", "jack", "ten", "nine",
+"eight", "seven", "six", "five", "four", "three", "two", "ace"),
+suit = c("spades", "spades", "spades", "spades", "spades", "spades",
+"spades", "spades", "spades", "spades", "spades", "spades", "spades",
+"clubs", "clubs", "clubs", "clubs", "clubs", "clubs", "clubs", "clubs",
+"clubs", "clubs", "clubs", "clubs", "clubs", "diamonds", "diamonds",
+"diamonds", "diamonds", "diamonds", "diamonds", "diamonds", "diamonds",
+"diamonds", "diamonds", "diamonds", "diamonds", "diamonds", "hearts",
+"hearts", "hearts", "hearts", "hearts", "hearts", "hearts", "hearts",
+"hearts", "hearts", "hearts", "hearts", "hearts"),
+value = c(13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 13, 12, 11, 10, 9, 8,
+7, 6, 5, 4, 3, 2, 1, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 13, 12, 11,
+10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+)
+
+write.csv(deck, file = "cards.csv", row.names = FALSE)
+```
+
 ## 4. R Notation
+
+deck[i,j] will return value of deck on ith row and jth column
+deck[1, 1:3] to extract multiple columns
+deck[-(2:55), 1:3] negative will remove some rows or columns
+deck[1,] extract every column
+deck[1, c("face","value")] extract with names
+
+```r
+deal <- function(cards) {
+  cards[1, ]
+}
+
+shuffle <- function(cards) {
+  random <- sample(1:52, size = 52)
+  cards[random, ]
+}
+
+## extract value
+mean(deck$value)
+
+## single bracket -> return list
+lst["numbers"]
+lst[1]
+
+## double bracket -> return elements
+lst[["numbers"]]
+lst[[1]]
+```
+
 ## 5. Modifying Value
+
+
+
+
+
 ## 6. Environments
 
 
