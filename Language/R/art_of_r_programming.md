@@ -584,6 +584,21 @@ function () {
 
 # 9. OOP
 
+- S3 and S4 class
+- S3 class
+  - a list
+  - a class name attribute
+  - dispatch capability
+- s4 class
+  - s3 class add safety
+
+## S3 Classes
+
+R is polymorphic, same function lead to different operation for different classes
+
+## S4 Classes
+
+## S3 vs S4
 
 
 # 10. I/O
