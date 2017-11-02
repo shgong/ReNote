@@ -723,7 +723,49 @@ cat("de\n",file="u",append=TRUE)
 
 # 12. Graphics
 
+```
+# point dot
+plot(c(1,2,3), c(1,2,4))
 
+# draw lm
+x <- c(1,2,3)
+y <- c(1,3,8)
+plot(x,y)
+lmout <- lm(y ~ x)
+abline(lmout)
+
+# add line to existing graph
+lines(c(1.5,2.5),c(3,3))
+
+# dot connect graph
+plot(x,y,type="l")
+
+# don't erase graph before another
+hist(x)
+
+X11()        # linux
+macintosh()  # mac
+windows      # win
+
+hist(y)
+
+
+# more functions
+points(testscores$Exam1,testscores$Exam3,pch="+")
+example(legend)
+text(2.5,4,"abc")
+```
+
+3D plot
+
+```
+> library(lattice)
+> a <- 1:10
+> b <- 1:15
+> eg <- expand.grid(x=a,y=b)
+> eg$z <- eg$x^2 + eg$x * eg$y
+> wireframe(z ~ x+y, eg)
+```
 
 # 13. Debugging
 
