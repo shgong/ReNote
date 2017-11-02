@@ -769,8 +769,174 @@ text(2.5,4,"abc")
 
 # 13. Debugging
 
+- R debugger
+- breakpoint
+
 # 14. Speed & memory
 
-# 15. Interfacing R to Other Languages
+- optimize R code through vectorization, use byte-code comilation
+- write key, CPU-intensive part in compiled language like C/C++
+- write code in form of parallel R
 
-# 16. Parallel R
+## The Dreaded For loop
+
+```
+x <- runif(1000000)
+y <- runif(1000000)
+
+> system.time(z <- x + y)
+user system elapsed
+0.052 0.016 0.068
+
+> system.time(for (i in 1:length(x)) z[i] <- x[i] + y[i])
+user system elapsed
+8.088 0.044 8.175
+```
+
+- why loop version is slow
+  - for() is a function
+  - colon ":" is a function
+  - vector subscription represent a function call
+    - call `[` for two reads
+    - call `[<-` for write
+  - need setting up stack frame to do function calls
+  - not exist in C
+
+- another: allocation cost
+  - array is dynamic data structure
+  - when full, will find a larger place in mermory, and copy paste, which is slow
+
+```
+# forms matrix of powers of vector x throguh degree dg
+powers1 <- function(x,dg) {
+  pw <- matrix(x,nrow=length(x))
+  prod <- x # current product
+  for (i in 2:dg) {
+    prod <- prod * x
+    pw <- cbind(pw,prod)
+  }
+  return(pw)
+}
+
+# cbind() is used to build up the output matrix, column by column
+# allocate the full matrix at the beginning, even though it will be empty
+
+# forms matrix of powers of the vector x, through degree dg
+powers2 <- function(x,dg) {
+  pw <- matrix(nrow=length(x),ncol=dg)
+  prod <- x # current product
+  pw[,1] <- prod
+  for (i in 2:dg) {
+    prod <- prod * x
+    pw[,i] <- prod
+  }
+  return(pw)
+}
+```
+
+## Functional Programming and Memory Issues
+
+Vector Assignment
+```
+z[3]<-8
+
+# is actually a call of replacement function
+
+z<- "[<-"(z,3,value=8)
+
+# an internal copy of z is made, and reassigned
+# entire vector is recomputed
+```
+
+
+Copy-on-Change Issue
+- `y<-z`
+- initially y share same memory with z
+- if either change, a copy is made in different area
+
+```
+> z <- runif(10)
+> tracemem(z)
+[1] "<0x88c3258>"
+> y <- z
+> z[3] <- 8
+> z[3]<-8
+tracemem[0x163f28b0 -> 0x163e8370]
+```
+
+Use Rprof() to find slow spots in your code
+
+
+## Byte Code Compilation
+```
+> library(compiler)
+> f <- function() for (i in 1:length(x)) z[i] <<- x[i] + y[i]
+> cf <- cmpfun(f)
+
+> system.time(for (i in 1:length(x)) z[i] <- x[i] + y[i])
+user system elapsed
+8.088 0.044 8.175
+
+> system.time(cf())
+user system elapsed
+0.845 0.003 0.848
+```
+
+# 15. Interfacing R to Other Languages
+## call C/C++ extension
+
+```c
+#include <R.h> // required
+// arguments:
+// m: a square matrix
+// n: number of rows/columns of m
+// k: the subdiagonal index--0 for main diagonal, 1 for first
+// subdiagonal, 2 for the second, etc.
+// result: space for the requested subdiagonal, returned here
+
+void subdiag(double *m, int *n, int *k, double *result)
+{
+  int nval = *n, kval = *k;
+  int stride = nval + 1;
+  for (int i = 0, j = kval; i < nval-kval; ++i, j+= stride)
+    result[i] = m[j];
+}
+```
+
+compile file
+```
+% R CMD SHLIB sd.c
+gcc -std=gnu99 -I/usr/share/R/include -fpic -g -O2 -c sd.c -o sd.o
+gcc -std=gnu99 -shared -o sd.so sd.o -L/usr/lib/R/lib -lR
+```
+
+use in R
+```
+> dyn.load("sd.so")
+> m <- rbind(1:5, 6:10, 11:15, 16:20, 21:25)
+> k <- 2
+> .C("subdiag", as.double(m), as.integer(dim(m)[1]), as.integer(k),
+result=double(dim(m)[1]-k))
+
+[[1]]
+[1] 1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25
+
+[[2]]
+[1] 5
+
+[[3]]
+[1] 2
+
+$result
+[1] 11 17 23
+```
+
+
+## use R from Python
+
+```
+sudo apt-get install python-rpy
+from rpy import *
+```
+
+refer to http://rpy.sourceforge.net/rpy/doc/rpy.pdf
