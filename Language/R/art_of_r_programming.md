@@ -584,28 +584,146 @@ function () {
 
 # 9. OOP
 
-- S3 and S4 class
-- S3 class
-  - a list
-  - a class name attribute
-  - dispatch capability
-- s4 class
-  - s3 class add safety
+- S3 class:a list, a class name attribute, add dispatch capability
+- s4 class:s3 class add safety
 
 ## S3 Classes
 
 R is polymorphic, same function lead to different operation for different classes
 
+A class instance is created by forming a list, with the components of the list being the member variables of the class. (like Perl's OOP system)
+
+```
+methods(print)
+getAnywhere()
+
+j <- list(name="Joe", salary=55000, union=T)
+class(j) <- "employee"
+attributes(j) # let's check
+
+## $names
+## [1] "name" "salary" "union"
+## $class
+## [1] "employee"
+
+print.employee <- function(wrkr) {
+  cat(wrkr$name,"\n")
+  cat("salary",wrkr$salary,"\n")
+  cat("union member",wrkr$union,"\n")
+}
+```
+
+Inheritance
+```
+k <- list(name="Kate", salary= 68000, union=F, hrsthismonth= 2)
+class(k) <- c("hrlyemployee","employee")
+
+## print will still work on k
+```
+
+
 ## S4 Classes
 
+S3 willl not complain if union missing, misspelled, assigned to irrelevant object by mistake.
+
+```
+## define a class
+setClass("employee",
+  representation(name="character",salary="numeric",union="logical")
+)
+
+joe <- new("employee",name="Joe",salary=55000,union=T)
+
+joe@salary
+slot(joe, "salary")
+
+setMethod("show", "employee",
+  function(object) {
+    inorout <- ifelse(object@union,"is","is not")
+    cat(object@name,"has a salary of",object@salary,
+    "and",inorout, "in the union", "\n")
+  }
+)
+
+show(joe)
+joe
+```
+
+
 ## S3 vs S4
+- John Chambers: S4 is needed to write clear and reliable software
+- Google R Style: Avoid S4 objects and methods when possible
+
+
+Helper functions
+```
+class(), mode()
+names(), attributes()
+unclass(), str()
+edit(), exists()
+```
 
 
 # 10. I/O
 
+## Keyboard and Monitor
+```
+scan()  ## read in a vector
+scan("integer.txt")
+scan("char.txt", what="", sep="\n")
+
+scan()  ## read block from keyboard
+readline() ## read line from keyboard
+
+print("abc")  ## only print one expression and output is numbered
+cat("abc\n")    ## custoimzed output
+```
+
+## Files
+```
+name age
+John 25
+Mary 28
+Jim 19
+
+z <- read.table("z.tab",header=TRUE)
+
+1 0 1
+1 1 1
+1 1 0
+1 1 0
+0 0 1
+
+x <- matrix(scan("x"),nrow=5,byrow=TRUE)
+
+John 25
+Mary 28
+Jim 19
+
+> z1 <- readLines("z1")
+> z1
+[1] "John 25" "Mary 28" "Jim 19"
+
+write.table(xc,"xcnew",row.names=FALSE,col.names=FALSE)
+cat("de\n",file="u",append=TRUE)
+```
+
 # 11. String Manipulation
 
+- functions
+  - grep(pattern, vector): return element id that contains pattern
+  - nchar(x): get length (not work with factor mode)
+  - paste(...): concat several strings
+  - sprintf(...): assemble string with format
+    - sprintf("the square of %d is %d", i, i^2)
+  - substr(x, start, stop): substring
+  - strsplit(x, split="-"): split x by split
+  - regexpr(pattern, text): find first pattern in text
+
+
 # 12. Graphics
+
+
 
 # 13. Debugging
 
