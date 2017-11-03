@@ -505,6 +505,7 @@ two linked list can be deep eq but not shallow.
   - B Tree
 
 2,3,4 Tree
+
 - Property
   - every node has 2,3 or 4 children, except leaves
   - every node stores 1,2 or 3 keys
@@ -527,3 +528,127 @@ two linked list can be deep eq but not shallow.
     - try steal from a sibling, rotate
     - if no adjacent has >1 keys, try steal key from parent, fusion with sibling
     - if parent is root, merge with sibling, tree depth decrease
+
+## 27. Graph
+
+- Graph representations
+  - adjacency matrix: time-efficient for complete graph
+  - adjacency list: sparse, time & space-efficient
+- Graph Taaversal
+  - DFS: pre-order traversal
+  - BFS: level-order traversal
+    - each vertex has boolean visited field
+- find shortest path: BFS, distance
+
+## 28. Weighted Graph
+
+- adjacency matrix: array of ints, doubles
+- adjacency list: each listnode includes a weight
+
+- Famous problem: Minimum spanning tree
+  - collect all nodes with least total distance, optimization
+- Kruskol's algorithm
+  - Spanning tree, or a forest if G is not connected
+  - start with empty tree T
+  - sort edges by weight, low to high
+  - iterate through edges, for each edge (u,w)
+    - add (u,w) to T, if u & w are not connected
+- why it is safe: edge is sorted
+
+
+## 29. Sorting I
+
+### Insertion sort
+
+- always ensure list is sorted
+- algorithm
+  - start with empty list S
+  - for each item in set
+    - insert x into S in sorted order
+- complexity
+  - S is linked list, O(n) to find position
+  - S is array, O(logn) to find, but O(n) to shift orders
+    - it is a in-place sort, use very little memory
+  - S is balanced search tree
+    - O(logn) guaranteed
+    - but this is not usual insertion sort
+
+### selection sort
+
+- worse, always O(n^2)
+- algorithm
+  - start with empty list S
+  - loop n times
+    - find smallest item
+    - remove and add to S
+- complexity
+  - S is array or linked list, both O(n^2)
+    - also in-place, swapping
+
+### heap sort
+
+- selection sort using heap
+- algorithm
+  - toss all items onto heap
+  - bottom up heap
+    - from bottom, swap to make it a heap
+  - loop n times
+    - remove min
+    - append to S
+- complexity
+  - removeMin is O(logn)
+  - in-place: maintain heap backward in an array
+    - last item is the root
+    - remove min, after bottom up, first space is empty
+    - keep doing, it is sorted
+  - excellent for arrays
+  - clumsy for linked lists
+
+### merge sort
+
+- you can merge two sorted list into one in linear time
+- algorithm
+  - while (Q1 Q2 not empty)
+    - check both front item
+    - move small one into Q
+  - concat remaining non-empty queue
+- complexity
+  - excellent for linked lists
+  - clumsy for arrays, not in-place, need twice much memory
+  - recursive divide and conquer
+    - split log(n) times, merge O(n)
+
+## 30. Sort II: quicksort
+
+- recursive divide and conquer
+- mergesort is simple divide, complex merge
+  - quicksort is complex divide, simple merge
+- fastest comparison-based sort
+  - worst case O(n^2)
+  - virtually always O(nlogn) in practice
+- algorithm
+  - pick a special pivot item
+  - partition with pivot item, I1, I2, V
+    - when linked list, use three part splits
+      - slow to go through same item
+    - when array, equal item can go to one partition
+      - because array sort, no place to put extra items
+  - simply concat S1, V, S2
+- complexity
+  - need choose pivot well
+    - if already sorted, use first item
+      - each time skew split O(n^2)
+  - how to choose
+    - randomly select an item
+    - on average 1/4, 3/4 split
+
+- implemented with array
+  - sort item a[lo] to a[hi]
+  - choose pivot v, swap with last item a[hi]
+  - let i=lo-1, j=hi
+    - keep all item left of i <= pivot
+    - keep all item right of j > pivot
+  - loop until i>=j
+    - advance i until > pivot
+    - decrease j until <= pivot
+    - swap
