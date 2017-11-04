@@ -504,8 +504,12 @@ two linked list can be deep eq but not shallow.
   - Red-black Tree
   - B Tree
 
-2,3,4 Tree
+### 2-3-4 B-Tree
 
+- B Tree
+  - multiple element per node
+  - less rebalance operation needed
+  - but waste some space as node is not full
 - Property
   - every node has 2,3 or 4 children, except leaves
   - every node stores 1,2 or 3 keys
@@ -652,3 +656,356 @@ two linked list can be deep eq but not shallow.
     - advance i until > pivot
     - decrease j until <= pivot
     - swap
+
+## 31. Disjoint Sets
+
+- No item is in more than one set
+- Every item in exactly one set
+- Support two operations
+  - union: merge 2 sets into one
+  - find: takes an item and tell what set it is in
+
+### List-based disjoint sets
+
+- Each set reference list of items in the set
+- Each item reference set that contains it
+  - find: O(1) time
+  - union: slow, O(n)
+
+### Tree-based disjoint sets
+
+- Each set is maintained as a tree, general tree
+  - data structure is a forest
+  - every item is initially root of its own tree
+  - tree identity of each set recorded at the root
+- Union: O(1) time
+  - make root of one set child of another root
+  - record size of tree, put smaller tree under larger tree
+- Find: slower
+  - proportional to item's depth
+
+### Union Find Set
+
+- Array, number from zero
+  - record parent of each item
+  - if has no parent, record size of its tree, using negative number
+  - initially every one is -1
+- Union
+  - if a[root2] < a[root1]
+    - a[root2] += a[root1]
+    - a[root1] = root2
+  - vice versa
+- Find
+  - if a[x] < 0
+    - return x
+  - else
+    - a[x] = find(a[x])
+    - return a[x]
+
+  - performance
+    - Union: O(1)
+    - Find: O(logn) at worst case, average close to constant
+
+
+## 32. Sorting III
+
+### Selection
+
+- Find kth smallest key in the list
+  - or find index k-1 if list is sorted
+  - application: find the median of a set, k=(n-1)/2
+- Quick Select, modifies quicksort
+  - start w/ unsorted list I
+  - choose pivot v from I
+  - partition into I1, Iv, I2
+  - only look into one of them when selection
+- complexity
+  - O(n) average
+
+
+### lower bound on comparison-based sorting
+
+- How to prove any other algorithm is slower than nlogn?
+- n numbers
+  - permutation of orders: n!
+  - n! >= (n/2)^(n/2)
+  - log(n!) >= n/2 * log(n/2)
+- Comparison-based sorting
+  - all decisions based on comparing keys
+  - sorting algorithm must generate a different sequence of t/f answers
+  - d question generates 2^d sequence of answers
+  - 2^d >= n!
+  - d >= nlog(n)
+- faster algorithms make q-way decision for large q
+
+
+### linear-time sorting
+
+- Bucket sort
+  - when keys are in small ranges, like 0 ~ q-1
+- Array of q queues
+  - put into queues, concat the queue
+  - O(q) to intialize and concat buckets
+  - O(n) to put items in buckets
+  - O(q+n)
+- Stable
+  - items with equal keys come out in the same order went in
+  - stable
+    - insertion
+    - selection
+    - merge sort
+    - list based qsort
+  - not stable
+    - array based qsort
+    - heap sort without secondary key
+
+
+## 33. Sorting V
+
+### Counting sort
+
+- if items are keys, no associated values
+  - no queues
+  - count copies of each key
+- with associated values
+  - no need to store a queue
+  - just count
+  - after the count
+    - do a scanLeft
+    - counts[i] tells first index to put items with key
+  - revisit the original queue, copy to designated location
+
+- Bucket sort and counting sort
+  - both take O(q+n) time
+    - counting sort for array
+    - bucket sort for linked list
+  - if q (number of possible keys) <= n
+
+
+
+### Radix sort
+
+- What is q >> n?
+  - like sort 1000 items in range 0, 9999999999
+
+- Provide q = 10 buckets
+  - make sure all number have the same digit (prepend 0)
+  - put into buckets using first digit
+    - within bucket is not sorted
+  - sort queue recursively on second digit ...
+    - but smaller subsets will be sorted inefficiently
+
+- Clever idea
+  - keep numbers in one pile throughout sort
+  - sort last digit first, then next-to-last
+  - this works because bucket and counting sorts are stable
+
+- In practice
+  - faster if we sort 2 digits at a time
+  - use q=256 radix, sort one byte at a time
+  - each pass inspect log2(q) bits of each key
+- running time
+  - `O((n+q)*(b/log2(q)) )`
+  - time: choose q=n, round down to power of two
+  - space: choose q=sqrt(n), round down to power of two
+
+
+## 34. Splay tree
+
+- Balance Binary Search Tree
+- All operations take O(logn) on average
+  - but some operation can be very slow, like O(n) at worst case
+    - it rebalance itself whenever has slow operation (like UFS)
+  - If satisfy conditions
+    - any sequence of k ops, starting from empty tree, within n items
+    - will take O(klogn) at worst-case time
+- Much easier to program than 2-3-4 trees
+- Fast access to frequent items O(1)
+- Most used data structure in industry
+
+
+- Tree Rotations
+  - many algorithm keep balance by rotation
+  - AVL, Red Black, Splay
+
+- Example of Rotations
+  - rotate right: Y[X[A,B], C] => X[A, Y[B,C]]
+  - rotate left: X[A, Y[B,C]] => Y[X[A,B], C]
+
+- Operation
+  - Find(k)
+    - begin like ordinary BST
+    - walk down tree to entry k, or dead end
+    - let X be node where search ended, whether it contains k or not
+    - Splay X up through a sequence of rotations, so X becomes root
+  - First(k)
+    - find entry with min/max key, splay it to root
+  - Insert(k,v)
+    - insert new entry into the tree like BST
+    - Splay new node to the root
+  - Remove(k)
+    - let X be node removed from tree
+    - Splay X's parent to root
+    - if X is already root, move greater node to root
+      - now X become child, can be removed
+      - then Splay X's parent to root
+    - if k is not in tree
+      - splay node last visited to the root
+
+- Splay
+  - Case 1. Zig zag
+    - X is left child of right child, or right child of left child
+    - rotate X up twice to grandfather
+      - G[P[A, X[B,C]] ,D]
+      - G[X[P[A,B], C], D]
+      - X[P[A,B], G[C,D]]
+  - Case 2. Zig Zig
+    - left child of left child, or right child of right child
+    - rotate grand parent first, then rotate parent
+      - G[P[X[A,B], C], D]
+      - P[X[A,B], G[C,D]]
+      - X[A, P[B,G[C,D]]]
+  - Case 3. Zig
+    - when child of root, usually last operation
+    - simple rotate
+      - P[X[A,B], C]
+      - X[A, P[B,C]]
+
+- Why zig-zig rotate grandfather first
+  - if insert in order
+  - you may build a very unbalanced tree
+    - 9-8-7-6-5-4-3-2-1-0
+  - find(1)
+    - when you do zig-zig
+    - rotate two level from left to the right
+    - you can get almost half depth of the tree
+    - depth d => at most d/2 + 3
+  - if use zig-zag
+    - you get 1-2-3-4-5-6-7-8-9
+    - not rebalanced at all
+
+
+## 35. Amortized Analysis
+
+- Average time
+  - Disjoint set, Hash table, Splay tree
+
+## 36. Randomized Analysis
+
+- Make decision
+  - roll of dice
+
+## 37. Expression Parsing
+
+- application of stacks
+  - infix: 3+4*7
+  - prefix: + 3 * 4 7
+  - postfix: 3 4 7 * +
+
+### Postfix
+- Evaluated by a stack of numbers
+- read expression, left to right
+  - number: push onto stack
+  - operator: pop top 2 number off stack
+
+###  Infix
+- first convert to postfix
+- Precedence rules
+  - first ^ then * / then + -
+- Association rule
+  - left: + - * /
+  - right: ^
+    - 2^3^5 = 2^(3^5)
+    - because (2^3)^5 = 2^(3*5)
+
+- read expression, left to right
+  - number: print out
+  - operator: put on stack until an operator with lower or equal precedence appears (for exponential, strictly lower), where upon we pop it and print it
+
+
+## 38. Garbage Collection
+
+- JVM use hidden data structure to manage memory
+
+- Object that you can not use become garbage
+  - Object is live, if reachable from root
+    - referenced by root
+    - referenced by another live object
+  - each object has visited tag
+
+- Memory Address
+  - array of bytes with address
+  - local variable -> name a memory location
+
+### Mark and Sweep GC
+- Java has DS to keep track of free & allocated memory
+- 2 phase
+- Mark: DFS from every root, mark all live object
+- Sweep: each object not marked has its memory reclaimed
+  - compacting GC move objects during sweep phase
+  - fragmentation: tendency of free memory broken into small pieces
+
+### Copying GC
+- Faster than mark & sweep GC, only have one phase (pro)
+- memory divided into 2 spaces, old space and new space, only half is available (con)
+- DFS to find live objects, if in old space, immediately moves to new space,  next time, new & old swap
+
+### Generational Garbage GC
+- Research found
+  - most objects have short lifetimes
+  - a few live very long
+- Generational GC have 2 or more generation with different sizes
+  - old generations
+    - Mark & Sweep GC
+    - Infrequently, so use compact one
+  - young generation
+    - most object die quickly, so use fast one
+    - Eden
+      - all object born here
+      - most die here, some move to survivor space
+      - Eden is cleared every run, so super fast
+    - Survivor space
+      - if survived a lot, get tenured
+      - moved to old generation
+
+- Problems
+  - Older generation don't run as frequent
+    - What if old generation reference young generation?
+    - how do you know it is referenced, without DFS old generation?
+  - Keep track of all reference from old to young generation
+    - add them to the roots of young generation's copying GC
+
+
+## 39. Augmenting data structure
+
+- you want something like BST, with
+  - Ordered dictionary
+  - find in O(1) time
+- Solution: use two data structure
+  - Splay tree + Hash table
+
+- Database of employee records
+  - Prius owners: list of employee
+  - Pot smokers: list of employee
+  - Cry babies: list of employee
+  - how to fire all tree huggers in O(n) time?
+    - keep employee back reference to each tree
+
+- Splay tree with node information
+  - record size and height of each subtree, for each node
+  - when rotate, calculate size, height with some formula
+- Query: how many keys between x and y
+  - in O(nlogn) amortized time
+  - search for X, Y
+    - don't go to subtree, just look up the number
+    - simply adds up ranged subtrees
+
+
+- Course Evaluation
+  - Good to have specific advice
+  - Once got advice: never again wear brown jacket with jeans
+    - most useful advice ever, implement immediately
+  - President on the radio this morning
+    - announcing a new English improvement plan
+    - all those important American words difficult to spell become easier to spell than ever
+    - as of today, abysmal is spelled as G-R-E-A-T

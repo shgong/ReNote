@@ -446,7 +446,7 @@ db_get () {
 
 #### B Trees
 
-- most wildly used indexing structure
+- most widely used indexing structure
   - SSTable keep large block and write sequentially
   - B Tree keep 4KB block/page and read/write one page at a time
     - each page has address, like pointer in disk (instead of memeory)
