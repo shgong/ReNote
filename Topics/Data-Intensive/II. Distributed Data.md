@@ -836,3 +836,124 @@
   - no algorithm that always reach consensus if node may crash
   - proved in async system model, that don't use timeout & clocks
   - so it is actually solvable with timeout and crash detection
+
+#### Atomic Commit and 2-Phase Commit
+
+- Atomicity is important, for
+  - Multi-object transaction
+  - database with secondary index
+    - separate data structure that need update consistently
+- Single Node
+  - transaction commitment crucially depends on the order
+  - single device makes the commit atomic
+- Multi-Node
+  - what to do?
+  - Use 2-Phase Commit
+
+
+- 2PC
+  - databases read and write on multiple participants
+  - when ready to commit, get unique transaction ID from coordinator
+  - Phase 1: prepare
+    - send prepare request to each of nodes
+  - Phase 2: commit
+    - if all participants reply yes
+      - commit point
+      - pariticipants surrenders the right to abort
+      - coordinator write deicision to transaction log on disk
+    - otherwise coordinator (transaction manager) sends abort signal
+
+
+- Coordinator fail
+  - participiant always wait for coordinator after prepare->yes
+  - if coordinator fails at this point, participants will be uncertain
+  - can only wait for coordinator recover
+  - BLOCKING
+
+- Nonblocking 3PC
+  - require a perfect failure detector
+    - tell if node crashed
+  - network delay is not reliable failure detector
+  - so could only use 2PC
+
+
+#### Fault-Tolerant Consensus
+
+- nodes propose values, consensus algorithm decides one
+- properties
+  - uniform agreement: no two nodes decide differently
+  - integrity: no node decide twice
+  - validity: if decide v, v was proposed by some node
+  - termination: if does not crash eventually, decides some value
+- you can have a dictator like 2PC, but what if coordinator failed?
+- consensus don't wait for any node
+  - though there is a limit like quorum
+
+
+- Consensus Algorithm
+  - VSR: Viewstamped Replication
+  - Paxos
+  - Raft
+  - Zab
+- Most algorithm decide on a sequence of values
+  - like total order broadcast algorithm
+  - require messages to be delivered exactly once, in the same order, to all nodes
+  - it is like multiple rounds consensus
+- Implementation
+  - VSR, Raft, Zab use total order broadcast directly
+    - more efficient than doing repeated rounds of one-value-at-a-time consensus
+  - Paxos
+    - multi-paxos optimization
+
+
+- Why we don't worry about consensus in the single-leader replication
+  - if leader chosen manually, it is dictatorship
+  - if automatic leader election, closer to total order broadcast
+  - but in order to elect a leader, we need consensus, which is a broadcast like single-leader replication, which requires a leader
+  - WTF?
+
+- Epoch numbering and quorums
+  - all consensus protocols internally use a leader in some form
+  - don't guarantee leader is unique
+  - instead, make weak guarantee: protocol defines an epoch number
+    - Paxos: ballot number
+    - VSR: view number
+    - Raft: term number
+  - guarantee within each epoch, leader is unique
+  - each election gives increased epoch number
+    - before leader decide anything
+      - first check there isn't some other leader with higher epoch, make a conflicting decision
+    - how to know itself is leader?
+      - Truth defined by Majority
+      - collect votes from a quorum of nodes
+    - for every decision a leader wants to make
+      - send proposed value to other nodes
+      - wait for a quorum of nodes respond
+      - if node is not aware of leader with higher epoch, vote yes
+
+- 2 Round Voting
+  - first vote for leader
+  - second vote for leader's proposals
+  - quorum for two votes must overlap
+
+- looks similar to 2PC
+  - but coordinator for 2PC is not elected
+  - coordinator require yes from every participants, not majority
+
+- Limitation of Consensus
+  - performance: vote on proposals is a sync replication
+  - strict-majority: need a minimum of 2n+1 nodes to tolerate n failure
+  - rely on time out to detect failure: varied delay will cause frequent leader election, harm performance
+  - edge case: if one particular network link is unreliable, Raft leadership will bounce between two nodes forever
+
+
+#### Membership and Coordination Services
+
+- ZooKeeper
+  - hold small data that fit in memoery
+  - replicated across all nodes using total order broadcast
+  - useful features
+    - linearizable atomic operations
+    - total order of oepration
+    - failure detection
+    - change notification
