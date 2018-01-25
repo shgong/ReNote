@@ -170,4 +170,21 @@
 
 ## V. Architecture
 
+- Primary purpose of architecture is to support life cycle of the system
+  - good architecture make the system easy to understand, develop, maintain and deploy
+- Create a shape for system that recognizes policy as the most essential element of the system
+  - while making details irrelevant to that policy, so can delay and defer
+  - not necessary to choose a DB in early days
+  - not necessary to choose a web server in early days
+  - not necessary to adopt REST in early days
+
+- Device Independence
+  - back in 1960s, bind code directly to the IO device, making code device dependent
+  - PDP-9 programs on teleprinter
+  - later, OS abstracted IO devices, same program can do I/O without changes
+  - Open-Closed Principle was born (not yet named)
+
+- Physical Addressing
+  - late 1960s,
+
 ## VI. Details
