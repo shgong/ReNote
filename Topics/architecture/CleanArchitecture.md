@@ -294,12 +294,14 @@ Instead, low level components should plugin high-level components
       - they don't know what they would do with it, they can't use it
       - but it doesn't matter
       - in late 1980s, RDBMS have highly effective marketing campaigns
-
 - Web is a detail
-
-
+  - did web change everything?
+  - the web is an IO device
 - Framework is a detail
-
-
-
-### Video Sales
+  - framework authors don't have your best interest at hearts
+    - they solve theirs, their coworkers and friends' problem, not yours
+  - Asymmetric Marriage
+    - you make huge commitment to the framework, but author make no commitment to you
+  - solution
+    - use the framework, don't couple to it
+    - treat as a detail that belongs in outer circles of the architecture
