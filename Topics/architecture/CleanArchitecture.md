@@ -185,6 +185,121 @@
   - Open-Closed Principle was born (not yet named)
 
 - Physical Addressing
-  - late 1960s,
+  - format cylinder to have sectors that fit Employee records
+  - format next cylinder to have sectors that fit Members records
+  - disaster when change to new disk
+  - should consider disk as huge array of sectors marked by address integer, write conversion routine
+
+### Independence
+
+- Use case
+  - separate UI of add-order use case from delete-order use case
+  - separate business rules and database as well
+  - so you can add new use case easily
+
+- Operation: thread, parallel, scalability
+  - maintain proper isolation, does not assume means of communication
+  - easier to transition through the system change
+  - micro-service typed architecture
+
+- Development: Conway's law
+  - Any organization that designs a system
+    - will produce a design whose structure is a copy of the organization's communication structure
+  - this means system should be developed independently by teams
+
+- deployment
+  - can immediately deploy after build
+  - achieved through partitioning and isolation of components
+  - enabled by micro-services
+
+### Boundaries - Drawing Lines
+
+- Software architecture is the art of line drawing
+
+- bad example
+  - all domain object has three tier of instantiation
+  - GUI, middleware, database
+  - on different machines, with rich system of inter-tier
+  - multiplied the development effort enormously
+
+### Policy and Level
+
+- carefully separate policies from another, regrouping them based on the way they change
+- form regrouped components into a DAG, a chain of dependency
+
+Example: a encryption program
+```
+function encrypt(){
+  while(true)
+    writeChar(translate(readChar()))
+}
+```
+It is incorrect, because high level encrypt functions depends on low-level readChar/writeChar function
+Instead, low level components should plugin high-level components
+
+### Business Rules
+
+- Entity: object that embodies a small set of critical business rules
+  - class in OOP language
+- Request and response models
+
+
+### Screaming Architecture
+
+- Good architectures are centered on use cases
+  - architects can safely describe the architectures without commiting to frameworks, tools, envs
+  - should allow decisions on frameworks, tools, envs defered and delayed
+- Web is not architecture
+  - it is a delivery mechanism, or IO device
+  - like console app, client app or service app
+
+### Clean Architecture
+
+- The dependency rule
+  - Source code dependencies must point only inward, toward higher-level policies
+  - Entities -> Use Cases/Data Access Interface -> Controller/Gateways -> Device/DB/UI/Web
+
+- Humble Object Pattern
+  - split behavior into two modules
+  - one is humble, contains all the hard-to-test behavior stripped down to barest essense
+    - view, like the GUI
+  - one contains all testable behavior
+    - presenter, the behavior of GUI
+- Similar boundries
+  - database gateways
+  - object relational mapper like Hibernates
+  - service listeners
+
+### Layers and Boundaries
+
+- Game Rule
+  - Language (English, Spanish)
+    - Text Delivery (SMS, Console)
+  - Data storage (Flash Data, Cloud Data)
 
 ## VI. Details
+
+- Database is a detail
+  - why are database so prevalent?
+    - Disks
+    - rotating magnetic disk was mainstay of data storage, disks are slow
+    - you need indexes, cached, optimized query schemes to mitigate the delay
+  - but you always read into memory and store in
+    - linked lists, hash tables, stacks and access by pointers
+  - anecdote
+    - when simple random access file system was more than sufficient
+    - why introduce all overhead and expense of a massive RDBMS?
+    - because customers
+      - they expect a relational database
+      - they don't know what they would do with it, they can't use it
+      - but it doesn't matter
+      - in late 1980s, RDBMS have highly effective marketing campaigns
+
+- Web is a detail
+
+
+- Framework is a detail
+
+
+
+### Video Sales
