@@ -18,3 +18,8 @@ $ # everything before the last slash:
 $ echo "${var%/*}"
 interesting/bla/blablabal
 ```
+
+- # remove until first
+- ## remove until last
+- % remove right until first
+- %% remove right until last
