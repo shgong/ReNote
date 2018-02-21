@@ -1,5 +1,25 @@
 # 1. Machine Learning Landscape
 
+- supervised
+  - KNN
+  - Linear/Logistic Regression
+  - SVM
+  - Decision Trees
+  - Neural Network
+- unsupervised learning
+  - K-means
+  - HCA (Hierarchical Cluster Analysis)
+  - EM (Expectation Maximization)
+  - PCA
+  - LLE
+- Reinforcement Learning
+  - AlphaGo
+  - agent can observe env and get rewards/penalties in return
+
+
+-
+
+
 # 2. End-to-End ML Project
 
 
