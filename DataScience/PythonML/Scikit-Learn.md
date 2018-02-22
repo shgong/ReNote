@@ -694,14 +694,116 @@ ada_clf.fit(X_train, y_train)
 
 
 # 8. Dimensionality Reduction
-## Curse of Dimensionality
 
 ## Main approaches
 - Projection
+  - training instances are not spread out uniformly across all dimensions
+  - many features are almost constant, while others highly correlated
+  - they actually lie in lower-dimensional subspace
+    - project 3d into 2d space
+    - unroll a swiss roll toy dataset
 - Manifold Learning
+  - manifold assumption
+  - the task at hand would be simpler if expressed in the lower dimensional manifold
 
 ## PCA
 
-## Kernel PCA
+- Principal Component Analysis
+- most popular dimensional reduction algorithm
+  - first identifies hyperplane lies close to data
+  - then project data onto it
+
+- Choosing the right hyperplane
+  - which axis to project?
+  - keep the max variance, lose less information when projection
+
+
+```py
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components = 2)
+X2D = pca.fit_transform(X)
+
+print(pca.explained_variance_ratio_)
+array([ 0.84248607,  0.14631839])
+```
+
+- This tells you that 84.2% of the dataset’s variance lies along the first axis, and 14.6% lies along the second axis. This leaves less than 1.2% for the third axis
+
+
+- PCA find many axis account for different variance
+  - unit vector defines ith axis is called ith Principal Component (PC)
+- Matrix Factorization: Single Value Decomposition (SVD)
+  - decompose training set matrix into dot product of three matrices
+  - U dot Sigma dot V， where VT contains all principal components
+
+
+- Warn: PCA Assume data center at the origin
+```py
+X_centered = X - X.mean(axis=0)
+U, s, V = np.linalg.svd(X_centered)
+c1 = V.T[:, 0]
+c2 = V.T[:, 1]
+```
+
+- Choose the dimensions that add up to a sufficient large portion
+  - like 95%
+  - compute minimum number of dimensions required
+
+```py
+pca = PCA()
+pca.fit(X)
+cumsum = np.cumsum(pca.explained_variance_ratio_)
+d = np.argmax(cumsum >= 0.95) + 1
+
+# another option
+pca = PCA(n_components=0.95)
+X_reduced = pca.fit_transform(X)”
+```
+
+
+
+- PCA compression
+  - on MNIST dataset, 784 -> 154
+```py
+pca = PCA(n_components = 154)
+X_mnist_reduced = pca.fit_transform(X_mnist)
+X_mnist_recovered = pca.inverse_transform(X_mnist_reduced)
+```
+
+
+- Incremental PCA
+  - what if dataset does not fit in memory, which SVD requires
+  - split into mini-batch and feed IPCA algorithm
+
+```py
+from sklearn.decomposition import IncrementalPCA
+
+n_batches = 100
+inc_pca = IncrementalPCA(n_components=154)
+for X_batch in np.array_split(X_mnist, n_batches):
+    inc_pca.partial_fit(X_batch)
+
+X_mnist_reduced = inc_pca.transform(X_mnist)
+```
+
 
 ## LLE
+- Locally Linear Embedding
+  - powerful nonlinear dimensionality reduction tech
+  - manifold learning that does not rely on projection
+- how does it work
+  - first measuring how each training instance relates to neighbors
+  - look for low-dimensional representation where local relationship best preserved
+  - great for unroll twisted manifolds
+- first for each instance, identifies k nearest neighbors
+  - find weight such that squared distance as small as possible
+  - try to reconstruct as linear function
+
+
+```
+from sklearn.manifold import LocallyLinearEmbedding
+
+lle = LocallyLinearEmbedding(n_components=2, n_neighbors=10)
+X_reduced = lle.fit_transform(X)
+```
