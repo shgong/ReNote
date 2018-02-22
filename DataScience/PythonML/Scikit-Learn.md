@@ -600,15 +600,97 @@ export_graphviz(
 - Decision Tree Regressor
 - regression tree produce a single value
 
-## Instability
-
 # 7. Ensemble Learning and Random Forests
+
 ## Voting Classifiers
+
+- aggregate predictions
+  - will out perform best model
+
+```py
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+
+log_clf = LogisticRegression()
+rnd_clf = RandomForestClassifier()
+svm_clf = SVC()
+
+voting_clf = VotingClassifier(
+        estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)],
+        voting='hard'
+    )
+voting_clf.fit(X_train, y_train)
+```
+
 ## Bagging and Pasting
+
+- another ways
+  - use same training algorithm
+  - run on different subsets (like image recognition)
+  - bootstrap aggregating (b-agging)
+  - if without replacement: pasting
+
 ## Random Patches and Random Subspaces
+The BaggingClassifier class supports sampling the features as well. This is controlled by two hyperparameters: max_features and bootstrap_features. They work the same way as max_samples and bootstrap, but for feature sampling instead of instance sampling. Thus, each predictor will be trained on a random subset of the input features.
+
+This is particularly useful when you are dealing with high-dimensional inputs (such as images). Sampling both training instances and features is called the Random Patches method.7 Keeping all training instances (i.e., bootstrap=False and max_samples=1.0) but sampling features (i.e., bootstrap_features=True and/or max_features smaller than 1.0) is called the Random Subspaces method”
+
+
 ## Random Forests
+
+- Ensembled decision trees via bagging
+  - instead of searching for best feature
+  - searching among a random subset of features
+    - result in greater tree diversity
+    - or considering random features for splitting, even more random
+- calculate feature importance by depth in the tree
+
+
 ## Boosting
+
+- hypothesis boosting
+  - any ensemble method that combine weak learners into strong learner
+  - train predictors sequentially, each trying to correct predecessor
+- famous boosting
+  - AdaBoost / adaptive boosting
+  - Gradient Boosting
+
+
+- AdaBoost
+  - pay more attention to training instances that predecessor underfitted
+  - this result in new predictors focusing more on hard cases
+  - each iteration, relative weight of misclassified instance is increased
+  - at the end, predictors have different weights depending on overall accuracy
+
+
+```py
+from sklearn.ensemble import AdaBoostClassifier
+
+ada_clf = AdaBoostClassifier(
+        DecisionTreeClassifier(max_depth=1), n_estimators=200,
+        algorithm="SAMME.R", learning_rate=0.5
+    )
+ada_clf.fit(X_train, y_train)
+```
+
+
+- Gradient Boosting
+  - not tweaking instance weights at every iteration
+  - try to fit new predictor to the residual errors
+- example: Gradient Tree Boosting / Regression Tree
+  - train first tree on y
+  - train 2nd tree on  y2 = y - tree1.predict(x)
+  - train 3rd tree on  y3 = y2 - tree2.predict(x)
+
+
 ## Stacking
+
+- Stacked generalization
+  - instead of using trivial functions to aggregate predictions
+  - train a model to preform the aggregation
+- Blender, or final predictor
 
 
 # 8. Dimensionality Reduction
