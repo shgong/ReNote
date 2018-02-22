@@ -537,14 +537,69 @@ poly_kernel_svm_clf.fit(X, y)
 - try to fit as many instances as possible on the margin
 
 # 6. Decision Trees
+- versatile
+- require little data preparation
+
 ## Training and visualizing a decision Tree
+
+```py
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+
+iris = load_iris()
+X = iris.data[:, 2:] # petal length and width
+y = iris.target
+
+tree_clf = DecisionTreeClassifier(max_depth=2)
+tree_clf.fit(X, y)
+
+
+
+from sklearn.tree import export_graphviz
+
+export_graphviz(
+        tree_clf,
+        out_file=image_path("iris_tree.dot"),
+        feature_names=iris.feature_names[2:],
+        class_names=iris.target_names,
+        rounded=True,
+        filled=True
+    )
+```
+
 ## Making Predictions
-## Estimating Class Probabilities
+- gini attribute
+  - means impurity
+  - pure gini=0, if all instances belong to same class
+- G_i =  1 - Sum(p_i,k ^ 2)
+  - p_i,k is ratio of class k instance among the training instances in ith node
+
+
 ## CART Training Algorithm
-## Computational Complexity
+
+- Scikit-learn use classification and regression tree
+  - first split using single feature k and threshold t_k
+    - choose k and t_k to produce purest subsets (weight by sizes)
+  - continue to split using same logic
+    - with a few control stopping conditions (min_sample_split, min_weight_leaf)
+
+- Greedy algorithm
+- find optimal tree is NP-Complete problem
+
 ## Gini Impurity or Entropy
-## Regularization Hyperparameters
+
+- Alternative: Entropy
+  - H_i = - Sum p_i,k * log(p_i,k)
+- does not make much difference
+- Gini is faster
+- Gini tends to isolate most frequent class in its own tree
+- Entropy tends to produce slightly more balanced tree
+
 ## Regression
+
+- Decision Tree Regressor
+- regression tree produce a single value
+
 ## Instability
 
 # 7. Ensemble Learning and Random Forests
