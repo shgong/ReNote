@@ -336,7 +336,8 @@ cvres = grid_search.cv_results_
 
 ## Binary Classifier
 
-0 SGD: Stochastic
+- SGD: Stochastic
+  - decide if a image is five
 ```py
 from sklearn.linear_model import SGDClassifier
 sgd_clf = SGDClassifier(random_state=42)
@@ -344,30 +345,196 @@ sgd_clf.fit(X_train, y_train_5)
 ```
 
 ## Performance Measures
+- Accuracy
+  - SGD performance 0.909, 0.9128
+  - only 10% is 5, guess not always has 90% accuracy
+  - thats's why accuracy is not the prefereed measure
+
+- Confusion Matrix
+  - precision = TP / (TP + FP)
+    - SGD 0.768
+  - recall/sensitivity = TP / (TP + FN)
+    - SGD 0.791
+  - PR curve: trade off between precision and recall
+    - favorable when positive case is rare
+    - or care more about false positives
+
+- ROC curve
+  - receiver operating characteristics
+  - use TP rate (recall) against FP rate (1-specificity)
+  - favorable when
+    - negative case is rare
+    - or care more about false negatives
+
+
 ## Multiclass Classification
-## Error Analysis
+- binary: SVM, Linear
+- multi: naive Bayes, random forest
+- oneVSone strategy: compare between them
+
 ## Multilabel Classification
-## Multioutput Classification
+- KNN
 
 
 # 4. Training Models
 
 ## Linear Regression
+
+- linear model with coefficients
+- solve normal equation, nxn matrix, get very slow when features increase
+
 ## Gradient Descent
+
+- finding optimal solutions to a wide range of problems
+  - filling parameter vector with random values, and tune it to find the local minimum
+  - find minimum of cost function
+  - which means gradient is zero
+- learning rate / steps
+  - may not converge if too large
+  - may take long time if too small
+- need ensure all features have similar scale to converge faster
+- may have global minimum pitfall
+  - luckily, MSE cost function for LR model happens to be convex
+
+- Batch Gradient Descent
+  - use whole training set to compute gradients
+
+```py
+eta = 0.1  # learning rate
+n_iterations = 1000
+m = 100
+
+theta = np.random.randn(2,1)  # random initialization
+
+for iteration in range(n_iterations):
+    gradients = 2/m * X_b.T.dot(X_b.dot(theta) - y)
+    theta = theta - eta * gradients
+```
+
+- Stochastic Gradient Descent
+  - pick a random instance and computes based on single instance
+  - much faster, but much less regular
+  - final parameter values are good but not optimal
+
+```py
+n_epochs = 50
+t0, t1 = 5, 50  # learning schedule hyperparameters
+
+def learning_schedule(t):
+    return t0 / (t + t1)
+
+theta = np.random.randn(2,1)  # random initialization
+
+for epoch in range(n_epochs):
+    for i in range(m):
+        random_index = np.random.randint(m)
+        xi = X_b[random_index:random_index+1]
+        yi = y[random_index:random_index+1]
+        gradients = 2 * xi.T.dot(xi.dot(theta) - yi)
+        eta = learning_schedule(epoch * m + i)
+        theta = theta - eta * gradients
+```
+
+- or a mix, mini-batch gradient descent
+
 ## Polynomial Regression
-## Learning Curves
+
+- add powers of features
+  - can have more accuracy, also easier to overfit
+- bias/variance trade off
+  - bias, estimate linear while quadratic
+  - variance, quadratic, sensitive to small variations
+
 ## Regularized Linear Models
+- restrict the degrees of freedoms
+  - ways to constraint the weights
+- Ridge
+  - a regularization term of square weights added to cost function
+  - not only fit the data, but keep model weights small
+- Lasso
+  - use L1 norm instead of L2 norm for weights
+  - tend to eliminate weights of least important features
+- Elastic Net
+  - middle ground, with a mix ratio
+  - ridge is a good default
+  - lasso may behave strange when num of features > training instances
+
+```py
+>>> from sklearn.linear_model import ElasticNet
+>>> elastic_net = ElasticNet(alpha=0.1, l1_ratio=0.5)
+>>> elastic_net.fit(X, y)
+>>> elastic_net.predict([[1.5]])
+```
+
 ## Logistic Regression
 
+- for binary classification
+  - a sigmoid function (S shape)
+  - p = 1 / (1 + exp ( -t ))
+  - compare p with 0.5 to determine prediction
+- cost function
+  - if y=1, -log p
+  - if y=0, -log (1-p)
 
 
 # 5. SVM
+
+- good for complex but small/mid datasets
+
 ## Linear SVM
+
+- SVM classifier fit the widest possible margin between classes
+  - determined by edge instances ( support vectors )
+  - sensitive to feature scales
+
+- some time clear margin is impossible
+- Soft Margin Classification
+
+```py
+import numpy as np
+from sklearn import datasets
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+
+iris = datasets.load_iris()
+X = iris["data"][:, (2, 3)]  # petal length, petal width
+y = (iris["target"] == 2).astype(np.float64)  # Iris-Virginica
+
+svm_clf = Pipeline((
+        ("scaler", StandardScaler()),
+        ("linear_svc", LinearSVC(C=1, loss="hinge")),
+    ))
+
+svm_clf.fit(X_scaled, y)
+```
+
 ## Nonlinear SVM
+
+- most dataset are not linear separatable
+- use PolynomialFeatures transformer, make dataset splittable
+- apply Kernel trick
+
+```py
+from sklearn.svm import SVC
+poly_kernel_svm_clf = Pipeline((
+        ("scaler", StandardScaler()),
+        ("svm_clf", SVC(kernel="poly", degree=3, coef0=1, C=5))
+    ))
+poly_kernel_svm_clf.fit(X, y)
+```
+
+
+- Gaussian RBF Kernel
+  - hyperparameter: gamma & c
+  - gamam: make bell-shape curve narrower
+    - if underfitting, increase gamma
+
 ## SVM Regression
-## Under the hood
 
-
+- reverse the objective
+- instead of fit largest margin, given margin violation
+- try to fit as many instances as possible on the margin
 
 # 6. Decision Trees
 ## Training and visualizing a decision Tree
