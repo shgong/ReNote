@@ -86,7 +86,7 @@ public class Bird {
 }
 ```
 
-Tolerance: A single switch on type is fine. It’s when their are multiple switches then bugs can be introduced as a person adding a new type can forget to update all the switches that exist on this hidden type. 
+Tolerance: A single switch on type is fine. It’s when their are multiple switches then bugs can be introduced as a person adding a new type can forget to update all the switches that exist on this hidden type.
 
 Solution: Use Polymorphism. Anyone introducing a new type cannot forget to add the associated behaviour
 
@@ -207,7 +207,7 @@ private class Repository {
         if (result != null) {
             return result;
         }
-        
+
         return defaultValue;
     }
 }
@@ -218,4 +218,3 @@ public class Finder {
     }
 }
 ```
-
