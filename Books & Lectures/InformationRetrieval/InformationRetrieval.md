@@ -20,12 +20,12 @@ from within large collections (usually stored on computers).
   - record whether each document contains a word
     - Binary term-document incidence matrix
 
-    ||Antony and Cleopatra|Julius Caesar|The Tempest|Hamlet|Othello|Macbeth
-    |---|---|---|---|---|---|---
-    |Antony|1|1|0|0|0|1
-    |Brutus|1|1|0|1|0|0
-    |Caesar|1|1|0|1|1|1
-    |mercy|1|0|1|1|1|1
+||Antony and Cleopatra|Julius Caesar|The Tempest|Hamlet|Othello|Macbeth
+|---|---|---|---|---|---|---
+|Antony|1|1|0|0|0|1
+|Brutus|1|1|0|1|0|0
+|Caesar|1|1|0|1|1|1
+|mercy|1|0|1|1|1|1
 
   - To answer which play contains Brutus & Caesar & !Calpurnia
     - take the vector, complement if not, do a bitwise AND
