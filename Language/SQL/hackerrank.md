@@ -79,5 +79,44 @@ order by company_code;
 ```
 
 
+# Aggregation
+```sql
+select floor(avg(population)) from city
+select ceiling(avg(population)) from city
+select max(population) - min(population) from city
 
-# Join
+--- repalce number values
+SELECT CEIL(AVG(Salary)-AVG(REPLACE(Salary,'0',''))) FROM EMPLOYEES;
+
+--- max income and max counts
+select max(months*salary), count(*) from employee where months*salary = (select max(months*salary) from Employee)
+select (salary * months) as earnings, count(*) from employee group by earnings order by earnings desc limit 1;
+
+--- round
+select round(sum(lat_n),2), round(sum(long_w),2) from station
+
+--- other column of max
+select ROUND(LONG_W,4) from STATION WHERE LAT_N = (SELECT MAX(LAT_N) FROM STATION WHERE LAT_N<137.2345);
+
+--- query distances
+select round(max(lat_n) - min(lat_n) + max(long_w) - min(long_w), 4) from station
+select round(sqrt(pow(max(lat_n) - min(lat_n),2) + pow(max(long_w) - min(long_w),2)), 4) from station
+
+--- median
+select round(lat_n,4) from station c
+where
+(select count(*) from station where lat_n>=c.lat_n) = (select count(*) from station where lat_n<=c.lat_n)
+
+```
+
+# Basic Join
+```sql
+--- city and country
+select sum(city.population) from city
+inner join country on city.countrycode = country.code
+where country.continent = 'Asia'
+
+
+
+
+```
