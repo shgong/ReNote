@@ -727,6 +727,7 @@
 
 #### CAP theorem
 
+- Consistence, Availability, Partition
 - trade-off
   - if require linearizability
     - some replica disconnected from other replicas

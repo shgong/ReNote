@@ -100,7 +100,7 @@ Use twitter for example, when someone post a tweet
 ### 1.3 Maintainability
 
 - Three design principle
-  - Operability
+  - Operatability
     - make routine task easy, with monitors, bug-tracking, good practice and tools
   - Simplicity
     - use abstraction to removing accidental complexity
