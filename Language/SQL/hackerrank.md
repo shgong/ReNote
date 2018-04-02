@@ -186,7 +186,75 @@ order by total desc, x.hacker_id
 ```
 
 # Advanced Join
+```sql
+-- Write a query to output the names of those students whose best friends got offered a higher salary than them. Names must be ordered by the salary amount offered to the best friends. It is guaranteed that no two students got same salary offer.
+
+select s.name from students s
+join friends f on f.id = s.id
+join Packages a on a.id = f.id
+join Packages b on b.id = f.friend_id
+where b.salary > a.salary
+order by b.salary
+
+--- or advance select
+select s.name from students s, friends f, Packages a, Packages b
+where s.id = f.id and s.id = a.id and f.id = a.id and f.friend_id = b.id and b.salary > a.salary
+order by b.salary
+
+--- Symmetric Pairs
+--- swap pairs, print x<y
+--- x=y pair, must occur twice
+
+(select distinct a.x,  a.y from Functions a, Functions b where a.x = b.y and a.y = b.x and a.x < a.y)
+union
+(select x, y from Functions f where x = y group by x having count(x) > 1)
+order by x asc
 
 
 
-# Alternatives
+--- must separately aggregate views and Submissions
+SELECT CT.contest_id,
+       CT.hacker_id,
+       CT.name,
+       Sum(ts),
+       Sum(tas),
+       Sum(tv),
+       Sum(tuv)
+FROM   contests CT
+       INNER JOIN colleges AS CL ON CL.contest_id = CT.contest_id
+       INNER JOIN challenges AS CH ON CH.college_id = CL.college_id
+       LEFT JOIN (SELECT challenge_id,
+                         Sum(total_submissions)          AS TS,
+                         Sum(total_accepted_submissions) AS TAS
+                  FROM   submission_stats
+                  GROUP  BY challenge_id) S
+              ON S.challenge_id = CH.challenge_id
+       LEFT JOIN (SELECT challenge_id,
+                         Sum(total_views)        AS TV,
+                         Sum(total_unique_views) AS TUV
+                  FROM   view_stats
+                  GROUP  BY challenge_id) V
+              ON V.challenge_id = CH.challenge_id
+GROUP  BY CT.contest_id, CT.hacker_id, CT.name
+ORDER  BY CT.contest_id;
+
+--- find distinct participant, winner for each days
+select
+submission_date ,
+
+( SELECT COUNT(distinct hacker_id)  
+ FROM Submissions s2  
+ WHERE s2.submission_date = s1.submission_date AND    
+ (SELECT COUNT(distinct s3.submission_date) FROM      Submissions s3 WHERE s3.hacker_id = s2.hacker_id AND s3.submission_date <   s1.submission_date) = dateDIFF(s1.submission_date , '2016-03-01')) ,
+--- every day has submission (count = datediff)
+
+(select hacker_id  from submissions s2
+ where s2.submission_date = s1.submission_date
+ group by hacker_id order by count(submission_id) desc , hacker_id limit 1) as winner_id,
+
+(select name from hackers where hacker_id = winner_id)
+from
+(select distinct submission_date from submissions) s1
+group by submission_date
+
+```
