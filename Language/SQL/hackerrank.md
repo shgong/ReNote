@@ -1,16 +1,6 @@
 # Basic select
 
 ```sql
-select * from CITY where COUNTRYCODE='USA' and POPULATION>100000
-select name from city where countrycode='USA' and population>120000
-select * from city
-select * from city where id=1661
-select * from city where COUNTRYCODE='JPN'
-select name from city where countrycode='JPN'
-
-
-select city, state from station
-
 -- distinct even id city
 select distinct city from station where id % 2 = 0
 
@@ -116,7 +106,15 @@ select sum(city.population) from city
 inner join country on city.countrycode = country.code
 where country.continent = 'Asia'
 
+--- group stats
+select country.continent, floor(avg(city.population)) from city
+inner join country on city.countrycode = country.code
+group by country.continent
 
-
+--- not equal join
+select IF(grade<8, NULL, name), grade, marks from
+students inner join grades
+on students.marks>=grades.min_mark and students.marks<=grades.max_mark
+order by grade desc, name, marks asc
 
 ```
