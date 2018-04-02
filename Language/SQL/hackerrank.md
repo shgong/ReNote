@@ -117,4 +117,76 @@ students inner join grades
 on students.marks>=grades.min_mark and students.marks<=grades.max_mark
 order by grade desc, name, marks asc
 
+-- top competitors
+select x.hacker_id, x.name from (
+  select a.hacker_id, a.name, count(*) as c
+  from Hackers a
+  inner join Submissions b on a.hacker_id = b.hacker_id
+  inner join Challenges c on c.challenge_id = b.challenge_id
+  inner join Difficulty d on c.difficulty_level = d.difficulty_level
+  where b.score = d.score  -- candidate that get full socre
+  group by a.hacker_id, a.name
+  order by count(*) desc, a.hacker_id
+) x where x.c>1
+
+select h.hacker_id, h.name as c from Hackers h
+inner join Submissions s on h.hacker_id = s.hacker_id
+inner join Challenges c on c.challenge_id = s.challenge_id
+inner join Difficulty d on c.difficulty_level = d.difficulty_level
+where s.score = d.score
+group by h.hacker_id, h.name
+having count(s.hacker_id)>1    -- having after group, before order by
+order by count(s.hacker_id) desc, s.hacker_id
+
+
+-- determining the minimum number of gold galleons needed to buy each non-evil wand of high power and age. Write a query to print the id, age, coins_needed, and power of the wands that Ron's interested in, sorted in order of descending power. If more than one wand has same power, sort the result in order of descending age.
+
+select w.id, p.age, w.coins_needed, w.power from Wands as w join Wands_Property as p on (w.code = p.code)
+where p.is_evil = 0
+and
+w.coins_needed = (
+    select min(coins_needed) from Wands as w1 join Wands_Property as p1 on (w1.code = p1.code)
+    where w1.power = w.power and p1.age = p.age
+) order by w.power desc, p.age desc
+
+-- print the hacker_id, name, and the total number of challenges created by each student.
+-- print all student with max submission, and other student with unique submission
+
+select H.hacker_id, H.name, count(*) as total
+from Hackers H, Challenges C where H.hacker_id = C.hacker_id group by H.hacker_id, H.name
+having total =
+    (select count(*)
+     from challenges
+     group by hacker_id
+     order by count(*) desc limit 1
+     )
+or total in
+    (select total
+     from (
+        select count(*) as total
+        from Hackers H, Challenges C
+        where H.hacker_id = C.hacker_id
+        group by H.hacker_id, H.name
+      ) counts
+     group by total
+     having count(*) = 1)
+order by total desc, H.hacker_id asc;
+
+-- sum score for each Submissions
+select x.hacker_id, x.name, sum(x.hiscore) as total from
+(
+    select h.hacker_id, h.name, max(score) as hiscore from
+    Hackers h
+    inner join Submissions s on h.hacker_id = s.hacker_id
+    group by h.hacker_id, h.name, s.challenge_id
+) x
+group by x.hacker_id, x.name
+having total != 0
+order by total desc, x.hacker_id
 ```
+
+# Advanced Join
+
+
+
+# Alternatives
