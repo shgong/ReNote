@@ -56,8 +56,23 @@ Serial Num	Type	User EmpNo
 
 - based on first-order predicate logic
   - as collection of predicate over finite set of variables
+- newer than network / hierarchy
 
-## 5. Object-relational Model
-## 6. Star schema
-snowflake schema
-centralized fact table connect to multiple dimensions
+- SQL vs Relational model
+  - SQL can have duplicate row
+  - order of column is defined
+  - NULL
+
+```
+Customer (Customer ID, Tax ID, Name, Address, City, State, Zip, Phone, Email,Sex)
+Order (Order No, Customer ID, Invoice No, Date Placed, Date Promised, Terms, Status)
+Order Line (Order No, Order Line No, Product Code, Qty)
+Invoice (Invoice No, Customer ID, Order No, Date, Status)
+Invoice Line (Invoice No, Invoice Line No, Product Code, Qty Shipped)
+Product (Product Code, Product Description)
+```
+
+## 5. Star schema
+
+- centralized fact table
+- connect to multiple dimension tables
