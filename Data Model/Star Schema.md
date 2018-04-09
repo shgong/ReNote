@@ -42,7 +42,21 @@ Fact Sales (Date_Id, Store_Id, Product_Id, Unit)
 Dim Date (Date_Id Date Day Month Quarter Year)
 Dim Product (Product_Id, EAN_code, Product_Name, Brand, Category)
 Dim Store (Store_Id, Store_Number, Store_State, Country)
+
+compared to snowflake Schema
+
+Date - Dim Month, Dim Quarter, Dim Day of week, additional id
+Store - Dim geography
+Product - Dim Brand, Dim Category, additional id
+
+star schema is denormalized
+
+easier to query
+more expensive to change a brand name etc.
 ```
+
+Think about read more, write more when design.
+
 
 ```SQL
 SELECT P.Brand, S.Country AS Countries, SUM(F.Units_Sold)
