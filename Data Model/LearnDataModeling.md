@@ -63,3 +63,65 @@ http://learndatamodeling.com/blog/category/data-modeling/
   - E102111
   - E101332
 - Organization Dimension
+
+
+## Product Dimension
+
+- Category Lookup
+  - 1: Apparel
+  - 2: Shoe
+- Sub-Category
+  - 11: Shirt
+  - 12: Trouser
+  - 13: Casual
+  - 14: Formal
+- Product
+  - 1001: Van Heusen
+  - 1002: Arrow
+  - 1003: Nike
+  - 1004: Adidas
+- Product Feature
+  - 10001 Van-M
+  - 10002 Van-L
+  - 10003 Van-XL
+
+
+## Development Cycle
+
+- Conceptual Data modeling
+  - Draw diagram
+  - Bank
+    - Investment
+      - Saving
+      - Checking
+      - Certificate Deposit
+    - Credit Card
+      - General Card
+      - Premiere Card
+      - VIP Card
+    - Loan
+      - Mortgage
+      - Personal
+
+- Logical Data Modeling
+  - employee
+    - state lookup
+    - country Lookup
+    - city lookup
+  - employer
+  - employer employee xref
+
+- Physical Data Modeling
+  - consider
+    - database performance
+    - indexing strategy
+    - physical storage
+  - employee
+    - id, Number(10,0), NN, PK
+    - country_cd: Varchar2(5), NN, FK
+    - st_cd: Varchar2(5), NN, FK
+    - city_cd: Varchar2(5), NN, FK
+    - Manager_id, Number, N, FK
+    - Name, Varchar2(15), NN
+
+## Type of Fact tables
