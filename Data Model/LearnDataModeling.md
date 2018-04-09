@@ -125,3 +125,10 @@ http://learndatamodeling.com/blog/category/data-modeling/
     - Name, Varchar2(15), NN
 
 ## Type of Fact tables
+
+- Transactional
+  - every line on a receipt
+- Periodic snapshots
+  - picture of the moment, dependent on the transactional table
+- Accumulating snapshots
+  - show the activity of a process that has a well-defined beginning and end
