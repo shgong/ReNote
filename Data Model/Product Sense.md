@@ -21,6 +21,7 @@
   - By Geography
 - Daily Active User
   - Monthly Active User (cannot link individual)
+    - rolling thirty day window
   - Monthly Unique User
   - Monthly Unique Payer
 - Average Booking per DAU
@@ -37,3 +38,12 @@
   - Learning and Development
   - Premium Subscription
   - Marketing Solutions
+
+
+- Revenue
+- User Engagement
+- User Behavior
+  - time
+  - device
+  - company
+- which break down is more valuable for the product
